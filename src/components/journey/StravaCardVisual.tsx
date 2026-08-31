@@ -318,7 +318,7 @@ export default function StravaCardVisual({ meetings }: Props) {
       </div>
 
       <p className="text-[10px] text-[var(--color-muted)] italic font-light text-center mt-3">
-        Tersimpan dalam resolusi HD tajam, siap diposting ke Instagram Story atau WhatsApp Status! 📸
+        Bagikan Kisah LDR Mu
       </p>
     </div>
   );
