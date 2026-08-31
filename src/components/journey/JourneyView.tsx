@@ -1,10 +1,23 @@
 "use client";
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import AbstractMap from "./AbstractMap";
 import JourneyTimeline, { MeetingItem } from "./JourneyTimeline";
 import AddMeetingModal from "./AddMeetingModal";
 import { Plus } from "lucide-react";
+
+// Dynamically import StravaRealMap without SSR (Leaflet requires browser window)
+const StravaRealMap = dynamic(() => import("./StravaRealMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-[4/3] rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center justify-center gap-2 animate-pulse mt-4 mx-4">
+      <span className="text-xl">🗺️</span>
+      <p className="text-[11px] uppercase tracking-widest text-[var(--color-muted)]">
+        Memuat Peta Rute Strava...
+      </p>
+    </div>
+  ),
+});
 
 interface Props {
   meetings: MeetingItem[];
@@ -17,7 +30,7 @@ export default function JourneyView({ meetings }: Props) {
   return (
     <div className="flex-1 w-full flex flex-col">
       {/* Tabs & Add Meeting Button */}
-      <div className="flex items-center justify-between px-8 mt-6 mb-2">
+      <div className="flex items-center justify-between px-6 mt-6 mb-2">
         <div className="flex items-center gap-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full p-1 shadow-sm">
           <button
             onClick={() => setView("map")}
@@ -27,7 +40,7 @@ export default function JourneyView({ meetings }: Props) {
                 : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
             }`}
           >
-            Map
+            Strava Map
           </button>
           <button
             onClick={() => setView("story")}
@@ -51,7 +64,7 @@ export default function JourneyView({ meetings }: Props) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 w-full relative min-h-[360px]">
+      <div className="flex-1 w-full relative min-h-[400px]">
         <AnimatePresence mode="wait">
           {view === "map" ? (
             <motion.div
@@ -60,9 +73,9 @@ export default function JourneyView({ meetings }: Props) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0"
+              className="w-full"
             >
-              <AbstractMap meetings={meetings} />
+              <StravaRealMap meetings={meetings} />
             </motion.div>
           ) : (
             <motion.div
@@ -71,7 +84,7 @@ export default function JourneyView({ meetings }: Props) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 overflow-y-auto pb-8"
+              className="w-full overflow-y-auto pb-8"
             >
               <JourneyTimeline meetings={meetings} />
             </motion.div>
