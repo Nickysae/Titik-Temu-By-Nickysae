@@ -106,9 +106,9 @@ export default function AddRinduForm() {
             exit={{ opacity: 0, y: -20 }}
             className="fixed bottom-28 left-1/2 -translate-x-1/2 bg-[var(--color-surface)] border border-[var(--color-border)] px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
           >
-            <span className="text-sm">🫙</span>
+            <span className="text-sm">💌</span>
             <span className="text-[11px] tracking-wider text-[var(--color-foreground)] uppercase">
-              I'll keep this for you.
+              Surat rindumu telah tersegel rapi.
             </span>
           </motion.div>
         )}
