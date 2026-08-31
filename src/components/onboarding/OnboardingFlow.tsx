@@ -83,18 +83,19 @@ export default function OnboardingFlow() {
   };
 
   const handleQuickDemo = async () => {
-    // Connect to pre-seeded demo couple
     setIsSubmitting(true);
     try {
-      await fetch("/api/space/join", {
+      const res = await fetch("/api/space/demo", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Rosyid", city: "Lamongan", inviteCode: "TEMU-2026" }),
       });
-    } catch {
-      // ignore if already joined
+      if (res.ok) {
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
-    router.refresh();
   };
 
   return (
@@ -138,9 +139,10 @@ export default function OnboardingFlow() {
 
               <button
                 onClick={handleQuickDemo}
-                className="mt-4 text-[10px] text-[var(--color-muted)] hover:text-[var(--color-brand)] uppercase tracking-wider transition-colors"
+                disabled={isSubmitting}
+                className="mt-4 text-[10px] text-[var(--color-muted)] hover:text-[var(--color-brand)] uppercase tracking-wider transition-colors disabled:opacity-50"
               >
-                ⚡ Buka Demo Space (Rosyid & Nara)
+                {isSubmitting ? "Membuka Demo..." : "⚡ Buka Demo Space: Layla & Majnun"}
               </button>
             </div>
           </motion.div>
