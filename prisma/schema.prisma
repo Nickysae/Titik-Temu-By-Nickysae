@@ -93,3 +93,14 @@ model Milestone {
 
   couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
 }
+
+model DailyAnswer {
+  id        String   @id @default(cuid())
+  coupleId  String
+  userId    String
+  dateKey   String   // Format YYYY-MM-DD
+  answer    String
+  createdAt DateTime @default(now())
+
+  @@unique([coupleId, userId, dateKey])
+}

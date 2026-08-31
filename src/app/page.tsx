@@ -3,6 +3,7 @@ import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import HeroCountdown from "@/components/home/HeroCountdown";
 import DistancePreview from "@/components/home/DistancePreview";
 import RinduJarPreview from "@/components/home/RinduJarPreview";
+import DailyQuestionWidget from "@/components/home/DailyQuestionWidget";
 import SpaceHeader from "@/components/layout/SpaceHeader";
 
 export default async function Home() {
@@ -86,6 +87,9 @@ export default async function Home() {
         <DistancePreview
           distance={nextMeeting?.distance ?? 0}
         />
+
+        {/* Daily Check-in Question */}
+        <DailyQuestionWidget />
 
         <RinduJarPreview count={rinduCount} />
       </div>
