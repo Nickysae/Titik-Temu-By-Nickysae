@@ -29,6 +29,20 @@ export default async function RinduPage() {
 
   const [userA, userB] = Object.values(countByUser);
 
+  // Find latest rindu for the mystery teaser
+  const sortedRindus = [...rindus].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const latest = sortedRindus[0] ?? null;
+  const latestAuthor = latest ? couple.members.find((m: any) => m.userId === latest.authorId)?.user.name || "Pasanganmu" : null;
+  const latestRinduTeaser = latest
+    ? {
+        authorName: latestAuthor || "Pasanganmu",
+        createdAt: latest.createdAt.toISOString(),
+        wordCount: latest.content.trim().split(/\s+/).length,
+      }
+    : null;
+
   const meetingDateStr = nextMeeting
     ? new Date(nextMeeting.scheduledAt).toLocaleDateString("id-ID", {
         day: "numeric",
@@ -56,6 +70,7 @@ export default async function RinduPage() {
         jarStatus={jar?.status ?? "LOCKED"}
         meetingDate={meetingDateStr}
         rindus={jar?.status === "OPENED" ? rindus : []}
+        latestRindu={latestRinduTeaser}
       />
     </div>
   );

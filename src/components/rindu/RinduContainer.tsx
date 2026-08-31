@@ -15,6 +15,11 @@ interface Props {
   jarStatus: string;
   meetingDate: string;
   rindus: RinduItem[];
+  latestRindu?: {
+    authorName: string;
+    createdAt: string;
+    wordCount: number;
+  } | null;
 }
 
 export default function RinduContainer({
@@ -26,6 +31,7 @@ export default function RinduContainer({
   jarStatus,
   meetingDate,
   rindus,
+  latestRindu,
 }: Props) {
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
 
@@ -42,6 +48,7 @@ export default function RinduContainer({
         nameA={nameA}
         nameB={nameB}
         meetingDate={meetingDate}
+        latestRindu={latestRindu}
       />
 
       {/* Two Halves Verification Button for Demo/Real Meeting */}
