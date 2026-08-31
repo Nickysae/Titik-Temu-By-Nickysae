@@ -1,17 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MeetingItem } from "./JourneyTimeline";
 import { getCityCoordinates } from "@/lib/geo";
-import { Loader2, Navigation } from "lucide-react";
+import { Loader2, Navigation, Download, Share2, Check } from "lucide-react";
+import { toPng } from "html-to-image";
 
 interface Props {
   meetings: MeetingItem[];
 }
 
 export default function StravaCardVisual({ meetings }: Props) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [totalKm, setTotalKm] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [svgPath, setSvgPath] = useState<string>("");
+  const [isExporting, setIsExporting] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
 
   const sortedMeetings = [...meetings].sort(
     (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
@@ -118,11 +122,70 @@ export default function StravaCardVisual({ meetings }: Props) {
   const lastDate = sortedMeetings[sortedMeetings.length - 1] ? new Date(sortedMeetings[sortedMeetings.length - 1].scheduledAt).getTime() : Date.now();
   const diffDays = Math.max(1, Math.round(Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24)));
 
+  // Download Card as PNG
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    setIsExporting(true);
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 3, // Ultra-sharp 3x retina resolution for IG Story
+      });
+
+      const link = document.createElement("a");
+      link.download = `titik-temu-strava-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Export image error:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Web Share API (native share on mobile browsers for IG Story / WhatsApp)
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setIsExporting(true);
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 3,
+      });
+
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], "titik-temu-journey.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Our Journey - Titik Temu",
+          text: `Perjalanan jarak dan rindu kami di Titik Temu (${displayKm} km)`,
+        });
+      } else if (navigator.share) {
+        await navigator.share({
+          title: "Our Journey - Titik Temu",
+          text: `Perjalanan jarak dan rindu kami di Titik Temu (${displayKm} km)`,
+          url: window.location.href,
+        });
+      } else {
+        // Fallback to download
+        handleDownload();
+      }
+    } catch (err) {
+      console.error("Share error:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-center px-4 pb-6">
-      {/* Clean White Strava Poster Card */}
-      <div className="w-full max-w-sm bg-white text-stone-900 rounded-3xl p-8 shadow-sm border border-[var(--color-border)] flex flex-col items-center select-none relative overflow-hidden">
-        
+      {/* Clean White Strava Poster Card with ref for high-res export */}
+      <div
+        ref={cardRef}
+        className="w-full max-w-sm bg-white text-stone-900 rounded-3xl p-8 shadow-sm border border-[var(--color-border)] flex flex-col items-center select-none relative overflow-hidden"
+      >
         {/* 1. Jarak */}
         <div className="flex flex-col items-center mb-7">
           <span className="text-[14px] text-stone-900 font-semibold tracking-normal mb-1">
@@ -224,6 +287,39 @@ export default function StravaCardVisual({ meetings }: Props) {
           </span>
         </div>
       </div>
+
+      {/* Social Media Share & Download Action Bar */}
+      <div className="w-full max-w-sm mt-4 flex items-center justify-center gap-3">
+        <button
+          onClick={handleDownload}
+          disabled={isExporting || isLoading}
+          className="flex-1 py-3 px-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl text-[11px] font-medium tracking-wider text-[var(--color-foreground)] hover:bg-stone-100 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+        >
+          {isExporting ? (
+            <Loader2 size={14} className="animate-spin text-[var(--color-brand)]" />
+          ) : (
+            <Download size={14} className="text-[var(--color-brand)]" />
+          )}
+          <span>Simpan Gambar</span>
+        </button>
+
+        <button
+          onClick={handleShare}
+          disabled={isExporting || isLoading}
+          className="flex-1 py-3 px-4 bg-[#fc4c02] text-white rounded-2xl text-[11px] font-semibold tracking-wider hover:bg-[#e04300] transition-all flex items-center justify-center gap-2 shadow-sm shadow-orange-500/20 disabled:opacity-50"
+        >
+          {isExporting ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Share2 size={14} />
+          )}
+          <span>Pamerkan / Bagikan</span>
+        </button>
+      </div>
+
+      <p className="text-[10px] text-[var(--color-muted)] italic font-light text-center mt-3">
+        Tersimpan dalam resolusi HD tajam, siap diposting ke Instagram Story atau WhatsApp Status! 📸
+      </p>
     </div>
   );
 }
