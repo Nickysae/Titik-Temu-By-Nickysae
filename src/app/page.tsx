@@ -36,7 +36,9 @@ export default async function Home() {
   const rinduCount = activeJar?.rindus?.length ?? 0;
   const names = couple.members.map((m: any) => m.user.name);
 
-  // If partner hasn't joined yet
+  const me = session.user;
+  const partnerMember = couple.members.find((m: any) => m.userId !== me?.id);
+  const partnerUser = partnerMember ? partnerMember.user : null;
   const isWaitingPartner = couple.members.length < 2;
 
   return (
@@ -86,6 +88,11 @@ export default async function Home() {
 
         <DistancePreview
           distance={nextMeeting?.distance ?? 0}
+          userACity={couple.userACity || me?.city || "Kota Kamu"}
+          userBCity={couple.userBCity || partnerUser?.city || "Kota Pasangan"}
+          myCity={me?.city || ""}
+          myName={me?.name || "Kamu"}
+          partnerName={partnerUser?.name || "Pasangan"}
         />
 
         {/* Daily Check-in Question */}
