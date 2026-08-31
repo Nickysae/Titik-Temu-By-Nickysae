@@ -1,69 +1,94 @@
-import Image from "next/image";
+import { getSession } from "@/lib/session";
+import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import HeroCountdown from "@/components/home/HeroCountdown";
+import DistancePreview from "@/components/home/DistancePreview";
+import RinduJarPreview from "@/components/home/RinduJarPreview";
+import SpaceHeader from "@/components/layout/SpaceHeader";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getSession();
+
+  // If user does not belong to any couple space yet, show onboarding
+  if (!session.couple) {
+    return <OnboardingFlow />;
+  }
+
+  const couple = session.couple;
+  const now = new Date();
+  const start = couple.relationshipStart ? new Date(couple.relationshipStart) : now;
+  const daysTogether = Math.floor(
+    (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const nextMeeting = couple.meetings.find(
+    (m: any) => new Date(m.scheduledAt) > now && m.status === "PLANNED"
+  );
+
+  const daysUntilMeet = nextMeeting
+    ? Math.ceil(
+        (new Date(nextMeeting.scheduledAt).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+
+  const activeJar = couple.rinduJars[0] ?? null;
+  const rinduCount = activeJar?.rindus?.length ?? 0;
+  const names = couple.members.map((m: any) => m.user.name);
+
+  // If partner hasn't joined yet
+  const isWaitingPartner = couple.members.length < 2;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex flex-col min-h-full">
+      {/* Top Space Bar */}
+      <SpaceHeader
+        inviteCode={couple.inviteCode}
+        isWaiting={isWaitingPartner}
+      />
+
+      {/* Couple Names & Days Together Header */}
+      <header className="pt-8 pb-6 flex flex-col items-center justify-center">
+        <h1 className="text-[11px] tracking-[0.3em] font-medium text-[var(--color-foreground)] uppercase">
+          {names[0] || "You"} <span className="mx-2 text-[var(--color-brand)] opacity-60">·</span> {names[1] || "Waiting..."}
+        </h1>
+        <div className="mt-6 flex flex-col items-center">
+          <span className="text-2xl font-light text-[var(--color-foreground)] tracking-wide">
+            {daysTogether} DAYS
+          </span>
+          <span className="text-[9px] tracking-[0.25em] text-[var(--color-muted)] mt-1.5 uppercase">
+            together
+          </span>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {daysUntilMeet !== null && nextMeeting ? (
+          <HeroCountdown
+            daysLeft={daysUntilMeet}
+            dateStr={new Date(nextMeeting.scheduledAt).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+            locationStr={nextMeeting.locationName}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 my-2 text-center px-8">
+            <p className="text-[12px] text-[var(--color-muted)] italic font-light">
+              {isWaitingPartner
+                ? "Menunggu pasanganmu memasukkan kode undangan..."
+                : "Belum ada rencana pertemuan berikutnya."}
+            </p>
+          </div>
+        )}
+
+        <DistancePreview
+          distance={nextMeeting?.distance ?? 0}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        <RinduJarPreview count={rinduCount} />
+      </div>
     </div>
   );
 }

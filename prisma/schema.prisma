@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  createdAt DateTime @default(now())
+
+  coupleMembers CoupleMember[]
+  rindus        Rindu[]
+}
+
+model Couple {
+  id                String    @id @default(cuid())
+  inviteCode        String    @unique
+  status            String    @default("PENDING") // PENDING, ACTIVE
+  relationshipStart DateTime?
+  userACity         String?
+  userBCity         String?
+  createdAt         DateTime  @default(now())
+
+  members    CoupleMember[]
+  meetings   Meeting[]
+  rinduJars  RinduJar[]
+  milestones Milestone[]
+}
+
+model CoupleMember {
+  id       String @id @default(cuid())
+  coupleId String
+  userId   String
+  role     String @default("PARTNER") // CREATOR, PARTNER
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([coupleId, userId])
+}
+
+model Meeting {
+  id           String    @id @default(cuid())
+  coupleId     String
+  title        String    @default("Meeting")
+  scheduledAt  DateTime
+  locationName String
+  distance     Int       @default(0)
+  status       String    @default("PLANNED") // PLANNED, COMPLETED
+  createdAt    DateTime  @default(now())
+
+  couple    Couple     @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  rinduJars RinduJar[]
+}
+
+model RinduJar {
+  id        String   @id @default(cuid())
+  coupleId  String
+  meetingId String?  
+  status    String   @default("LOCKED") // LOCKED, OPENED, ARCHIVED
+  createdAt DateTime @default(now())
+
+  couple  Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  meeting Meeting? @relation(fields: [meetingId], references: [id])
+  rindus  Rindu[]
+}
+
+model Rindu {
+  id        String   @id @default(cuid())
+  jarId     String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  jar    RinduJar @relation(fields: [jarId], references: [id], onDelete: Cascade)
+  author User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  coupleId    String
+  title       String
+  description String?
+  date        DateTime
+  type        String   @default("MOMENT") // START, ANNIVERSARY, MEETING, MOMENT
+  createdAt   DateTime @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+}
