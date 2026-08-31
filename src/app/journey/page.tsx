@@ -18,7 +18,14 @@ export default async function JourneyPage() {
 
   const completedMeetings = couple.meetings.filter((m: any) => m.status === "COMPLETED");
   const uniquePlaces = new Set(completedMeetings.map((m: any) => m.locationName)).size;
-  const totalKm = couple.meetings.reduce((acc: number, m: any) => acc + (m.distance ?? 0), 0);
+  const completedKm = completedMeetings.reduce((acc: number, m: any) => acc + (m.distance ?? 0), 0);
+  const plannedKm = couple.meetings
+    .filter((m: any) => m.status === "PLANNED")
+    .reduce((acc: number, m: any) => acc + (m.distance ?? 0), 0);
+
+  const hasCompleted = completedMeetings.length > 0;
+  const displayKmValue = hasCompleted ? completedKm : plannedKm;
+  const kmLabel = hasCompleted ? "KM Crossed" : "Planned KM";
 
   return (
     <div className="flex flex-col min-h-full">
@@ -56,8 +63,8 @@ export default async function JourneyPage() {
         </div>
         <div className="w-[1px] h-6 bg-[var(--color-border)]" />
         <div className="flex flex-col items-center">
-          <span className="text-lg font-light text-[var(--color-foreground)]">{totalKm.toLocaleString("id-ID")}</span>
-          <span className="text-[8px] tracking-[0.2em] text-[var(--color-brand)] uppercase mt-0.5 font-medium">KM Crossed</span>
+          <span className="text-lg font-light text-[var(--color-foreground)]">{displayKmValue.toLocaleString("id-ID")}</span>
+          <span className="text-[8px] tracking-[0.2em] text-[var(--color-brand)] uppercase mt-0.5 font-medium">{kmLabel}</span>
         </div>
       </div>
     </div>
