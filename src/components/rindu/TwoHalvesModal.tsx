@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, CheckCircle2, QrCode, Camera, X, Smartphone, RefreshCw } from "lucide-react";
+import { Sparkles, CheckCircle2, QrCode, Camera, X, Smartphone, RefreshCw, Download, Layers } from "lucide-react";
 import QRCode from "qrcode";
 import jsQR from "jsqr";
 import confetti from "canvas-confetti";
@@ -20,6 +20,7 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
   const [verifyState, setVerifyState] = useState<"idle" | "scanning" | "success" | "error">("idle");
   const [cameraActive, setCameraActive] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,23 +32,21 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
 
     async function generateKey() {
       try {
-        // Fetch current session info
-        const res = await fetch("/api/daily"); // session ping
-        // Create verification payload
         const payload = JSON.stringify({
           app: "titik-temu",
           action: "UNLOCK_RINDU_JAR",
           timestamp: Date.now(),
         });
 
+        // High resolution QR code with error correction H
         const url = await QRCode.toDataURL(payload, {
-          width: 320,
-          margin: 1,
+          width: 800, // 800px HD resolution for physical printing
+          margin: 2,
           color: {
             dark: "#1c1917",
             light: "#ffffff",
           },
-          errorCorrectionLevel: "H", // High redundancy allows split rendering
+          errorCorrectionLevel: "H",
         });
         setQrDataUrl(url);
       } catch (err) {
@@ -156,6 +155,50 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
     }, 2800);
   };
 
+  // Export & Download Split PNG / SVG (Ready for Casing, Merch, Stickers)
+  const handleDownloadHalf = async (exportSide: "LEFT" | "RIGHT" | "FULL") => {
+    if (!qrDataUrl) return;
+    setIsExporting(true);
+
+    try {
+      const img = new Image();
+      img.src = qrDataUrl;
+      await new Promise((resolve) => (img.onload = resolve));
+
+      const size = 1000; // Ultra HD 1000x1000px
+      const canvas = document.createElement("canvas");
+      canvas.width = exportSide === "FULL" ? size : size / 2;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+
+      if (ctx) {
+        // Transparent crisp background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (exportSide === "FULL") {
+          ctx.drawImage(img, 0, 0, size, size);
+        } else if (exportSide === "LEFT") {
+          // Draw left half (0 to 500)
+          ctx.drawImage(img, 0, 0, size / 2, size, 0, 0, size / 2, size);
+        } else if (exportSide === "RIGHT") {
+          // Draw right half (500 to 1000)
+          ctx.drawImage(img, size / 2, 0, size / 2, size, 0, 0, size / 2, size);
+        }
+
+        const halfData = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `titik-temu-key-${exportSide.toLowerCase()}-${Date.now()}.png`;
+        link.href = halfData;
+        link.click();
+      }
+    } catch (err) {
+      console.error("Export error:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -217,13 +260,13 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
           </button>
         </div>
 
-        {/* TAB 1: Display Split Half QR Code */}
+        {/* TAB 1: Display Split Half QR Code & Download Actions */}
         {tab === "my-half" && (
           <div className="flex flex-col items-center">
             {/* Split Selector (Left Half vs Right Half) */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[9px] uppercase tracking-wider text-[var(--color-muted)] font-medium">
-                Pilih Sisi Layarmu:
+                Pilih Sisi Belahan:
               </span>
               <button
                 onClick={() => setRole("LEFT")}
@@ -248,7 +291,7 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
             </div>
 
             {/* Split QR Visual Container */}
-            <div className="w-52 h-52 bg-white rounded-3xl p-3 shadow-md border-2 border-stone-200 relative overflow-hidden flex items-center justify-center">
+            <div className="w-48 h-48 bg-white rounded-3xl p-3 shadow-md border-2 border-stone-200 relative overflow-hidden flex items-center justify-center">
               {qrDataUrl ? (
                 <div
                   className="w-full h-full relative overflow-hidden"
@@ -264,7 +307,7 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
                     alt="Split QR Seal"
                     className="w-full h-full object-contain"
                   />
-                  {/* Subtle jagged glowing edge along the cut */}
+                  {/* Glowing edge along the cut */}
                   <div
                     className={`absolute top-0 bottom-0 w-[2px] bg-orange-500 shadow-[0_0_8px_#ea580c] ${
                       role === "LEFT" ? "right-[50%]" : "left-[50%]"
@@ -278,15 +321,30 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
               )}
             </div>
 
-            {/* Instruction Card */}
-            <div className="mt-4 p-3 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0">
-                <Smartphone size={16} />
-              </div>
-              <p className="text-[10px] text-[var(--color-muted)] leading-relaxed text-left">
-                Minta <strong className="text-[var(--color-foreground)]">{partnerName}</strong> memilih sisi berlawanan, lalu tempelkan kedua HP sejajar di atas meja!
-              </p>
+            {/* Download Buttons Bar for Custom Merchandise */}
+            <div className="w-full mt-4 flex items-center gap-2">
+              <button
+                onClick={() => handleDownloadHalf(role)}
+                disabled={isExporting || !qrDataUrl}
+                className="flex-1 py-2.5 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-stone-100 rounded-xl text-[10px] font-semibold tracking-wider text-[var(--color-foreground)] flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50"
+              >
+                <Download size={13} className="text-orange-600" />
+                <span>Unduh Sisi {role === "LEFT" ? "Kiri" : "Kanan"} (HD PNG)</span>
+              </button>
+
+              <button
+                onClick={() => handleDownloadHalf("FULL")}
+                disabled={isExporting || !qrDataUrl}
+                title="Unduh QR Utuh"
+                className="p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-stone-100 rounded-xl text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-all shadow-sm"
+              >
+                <Layers size={14} />
+              </button>
             </div>
+
+            <p className="text-[9px] text-[var(--color-muted)] italic font-light text-center mt-2.5 leading-snug">
+              💡 Gambar HD transparan siap dicetak di casing HP, stiker, gantungan kunci, atau gelang couple!
+            </p>
           </div>
         )}
 
