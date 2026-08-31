@@ -31,15 +31,19 @@ export default function StravaCardVisual({ meetings }: Props) {
         return;
       }
 
-      // Default fallback distance
+      // Default fallback distance directly from registered meetings
       const fallbackKm = sortedMeetings.reduce((acc, m) => acc + (m.distance || 0), 0);
-      const locations = sortedMeetings.map((m) => m.locationName);
       
-      let rawPoints: [number, number][] = sortedMeetings.map((m, i) =>
-        getCityCoordinates(m.locationName, i)
+      // If there is only 1 meeting, calculate real route from origin city to meeting city
+      const locations = sortedMeetings.length === 1
+        ? ["Surabaya", sortedMeetings[0].locationName]
+        : sortedMeetings.map((m) => m.locationName);
+      
+      let rawPoints: [number, number][] = locations.map((loc, i) =>
+        getCityCoordinates(loc, i)
       );
 
-      if (sortedMeetings.length >= 2) {
+      if (locations.length >= 2) {
         try {
           const res = await fetch("/api/route", {
             method: "POST",
@@ -51,7 +55,10 @@ export default function StravaCardVisual({ meetings }: Props) {
             const data = await res.json();
             if (data.coordinates && data.coordinates.length > 0) {
               rawPoints = data.coordinates;
-              if (data.distanceKm) {
+              // If single meeting, respect the meeting's stored distance or ORS calculated distance
+              if (sortedMeetings.length === 1 && fallbackKm > 0) {
+                setTotalKm(fallbackKm);
+              } else if (data.distanceKm) {
                 setTotalKm(data.distanceKm);
               } else {
                 setTotalKm(fallbackKm);
