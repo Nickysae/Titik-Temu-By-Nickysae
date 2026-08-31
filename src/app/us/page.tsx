@@ -4,6 +4,7 @@ import StoryTimeline from "@/components/us/StoryTimeline";
 import UsStats from "@/components/us/UsStats";
 import AddMomentButton from "@/components/us/AddMomentButton";
 import SpaceHeader from "@/components/layout/SpaceHeader";
+import LdrGraduationSection from "@/components/us/LdrGraduationSection";
 
 export default async function UsPage() {
   const session = await getSession();
@@ -25,8 +26,17 @@ export default async function UsPage() {
   const totalKm = couple.meetings.reduce((acc: number, m: any) => acc + (m.distance ?? 0), 0);
 
   const names = couple.members.map((m: any) => m.user.name);
+  const me = session.user;
+  const partnerMember = couple.members.find((m: any) => m.userId !== me?.id);
+  const partnerUser = partnerMember?.user ?? null;
 
   const startDateStr = start.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const endDateStr = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -72,6 +82,21 @@ export default async function UsPage() {
           places={uniquePlaces}
           kmCrossed={totalKm.toLocaleString("id-ID")}
           rinduSaved={totalRindu}
+        />
+
+        {/* LDR Graduation Reward Section */}
+        <LdrGraduationSection
+          nameA={names[0] || "Kamu"}
+          nameB={names[1] || "Pasangan"}
+          daysTogether={daysTogether}
+          startDateStr={startDateStr}
+          endDateStr={endDateStr}
+          meetingsDone={meetingsDone}
+          uniquePlaces={uniquePlaces}
+          totalKm={totalKm}
+          totalRindu={totalRindu}
+          userACity={couple.userACity || me?.city || ""}
+          userBCity={couple.userBCity || partnerUser?.city || ""}
         />
       </div>
     </div>
