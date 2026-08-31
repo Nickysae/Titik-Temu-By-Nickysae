@@ -23,7 +23,7 @@ export async function GET() {
     }
 
     const now = new Date();
-    const start = new Date(couple.relationshipStart);
+    const start = couple.relationshipStart ? new Date(couple.relationshipStart) : now;
     const daysTogether = Math.floor(
       (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
     );
