@@ -10,21 +10,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least 2 locations required" }, { status: 400 });
     }
 
-    const apiKey = process.env.ORS_API_KEY;
-    if (!apiKey) {
-      // Fallback: return straight-line coordinates if no API key set
-      const coords = locations.map((loc: string, i: number) => {
-        const [lat, lng] = getCityCoordinates(loc, i);
-        return [lng, lat]; // ORS uses [lng, lat] format
-      });
-      return NextResponse.json({ type: "straight", coordinates: coords });
-    }
-
     // Build ORS coordinate pairs [lng, lat]
     const coordinates = locations.map((loc: string, i: number) => {
       const [lat, lng] = getCityCoordinates(loc, i);
       return [lng, lat];
     });
+
+    // If only 2 locations and distance calculation requested
+    const apiKey = process.env.ORS_API_KEY;
+    if (!apiKey) {
+      // Fallback: calculate Haversine distance if no ORS API key
+      const [lat1, lng1] = getCityCoordinates(locations[0], 0);
+      const [lat2, lng2] = getCityCoordinates(locations[1], 1);
+      const { getDistanceKm } = await import("@/lib/geo");
+      const straightKm = getDistanceKm([lat1, lng1], [lat2, lng2]);
+
+      const coords = locations.map((loc: string, i: number) => {
+        const [lat, lng] = getCityCoordinates(loc, i);
+        return [lng, lat];
+      });
+      return NextResponse.json({
+        type: "straight",
+        coordinates: coords.map(([lng, lat]: [number, number]) => [lat, lng]),
+        distanceKm: straightKm,
+      });
+    }
 
     // Call OpenRouteService Directions API
     const orsRes = await fetch(

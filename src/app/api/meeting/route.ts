@@ -13,7 +13,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const couple = await prisma.couple.findFirst();
+    const { getSession } = await import("@/lib/session");
+    const session = await getSession();
+    const couple = session.couple;
     if (!couple) {
       return NextResponse.json({ error: "No couple found" }, { status: 404 });
     }

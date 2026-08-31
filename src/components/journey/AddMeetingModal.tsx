@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, MapPin, Navigation } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { X, Navigation, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -13,9 +13,44 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
-  const [distance, setDistance] = useState("72");
+  const [distance, setDistance] = useState<number | "">("");
+  const [isCalculating, setIsCalculating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  // Auto-calculate distance whenever location changes (debounced)
+  useEffect(() => {
+    if (!location.trim() || location.trim().length < 3) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCalculating(true);
+      try {
+        const res = await fetch("/api/route", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            // Calculate route/distance from user's origin to target location
+            locations: [location.trim(), "Surabaya"],
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.distanceKm === "number" && data.distanceKm > 0) {
+            setDistance(data.distanceKm);
+          }
+        }
+      } catch (err) {
+        console.error("Auto calculate distance error:", err);
+      } finally {
+        setIsCalculating(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +75,7 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
       setTitle("");
       setDate("");
       setLocation("");
+      setDistance("");
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -79,7 +115,7 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
             </label>
             <input
               type="text"
-              placeholder="e.g. Meeting #09 / Weekend Getaway"
+              placeholder="e.g. Pertemuan di Bawah Bintang"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
@@ -107,7 +143,7 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Surabaya"
+                placeholder="e.g. Yogyakarta, Bandung, Malang..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
@@ -116,23 +152,41 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
             </div>
 
             <div>
-              <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block mb-1.5 font-medium">
-                Distance (KM)
-              </label>
-              <input
-                type="number"
-                placeholder="e.g. 72"
-                value={distance}
-                onChange={(e) => setDistance(e.target.value)}
-                className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block font-medium">
+                  Distance (KM)
+                </label>
+                {isCalculating && (
+                  <span className="flex items-center gap-1 text-[8px] text-orange-500 font-medium">
+                    <Loader2 size={9} className="animate-spin" /> Auto
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  placeholder="Auto..."
+                  value={distance}
+                  onChange={(e) => setDistance(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
+                />
+                {distance !== "" && !isCalculating && (
+                  <span className="absolute right-2.5 top-2.5 text-[10px] text-emerald-600 font-medium flex items-center gap-0.5 pointer-events-none">
+                    <Sparkles size={10} /> ORS
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+
+          <p className="text-[9px] text-[var(--color-muted)] italic font-light">
+            💡 Jarak otomatis dikalkulasi secara realtime via OpenRouteService saat kamu mengetik nama kota.
+          </p>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full mt-3 py-3 rounded-full bg-[var(--color-foreground)] text-white hover:bg-[var(--color-brand)] text-[10px] font-medium tracking-[0.2em] uppercase transition-all duration-300 shadow-md disabled:opacity-50"
+            className="w-full mt-2 py-3 rounded-full bg-[var(--color-foreground)] text-white hover:bg-[var(--color-brand)] text-[10px] font-medium tracking-[0.2em] uppercase transition-all duration-300 shadow-md disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save Planned Meeting"}
           </button>
