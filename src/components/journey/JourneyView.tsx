@@ -6,6 +6,8 @@ import JourneyTimeline, { MeetingItem } from "./JourneyTimeline";
 import AddMeetingModal from "./AddMeetingModal";
 import { Plus } from "lucide-react";
 
+import StravaCardVisual from "./StravaCardVisual";
+
 // Dynamically import StravaRealMap without SSR (Leaflet requires browser window)
 const StravaRealMap = dynamic(() => import("./StravaRealMap"), {
   ssr: false,
@@ -13,7 +15,7 @@ const StravaRealMap = dynamic(() => import("./StravaRealMap"), {
     <div className="w-full aspect-[4/3] rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col items-center justify-center gap-2 animate-pulse mt-4 mx-4">
       <span className="text-xl">🗺️</span>
       <p className="text-[11px] uppercase tracking-widest text-[var(--color-muted)]">
-        Memuat Peta Rute Strava...
+        Memuat Peta Rute...
       </p>
     </div>
   ),
@@ -24,7 +26,7 @@ interface Props {
 }
 
 export default function JourneyView({ meetings }: Props) {
-  const [view, setView] = useState<"map" | "story">("map");
+  const [view, setView] = useState<"strava" | "map" | "story">("strava");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
@@ -33,18 +35,28 @@ export default function JourneyView({ meetings }: Props) {
       <div className="flex items-center justify-between px-6 mt-6 mb-2">
         <div className="flex items-center gap-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full p-1 shadow-sm">
           <button
+            onClick={() => setView("strava")}
+            className={`px-4 py-1.5 rounded-full text-[10px] tracking-[0.15em] uppercase transition-all duration-300 ${
+              view === "strava"
+                ? "bg-[#fc4c02] text-white font-semibold shadow-sm"
+                : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+            }`}
+          >
+            Strava
+          </button>
+          <button
             onClick={() => setView("map")}
-            className={`px-5 py-1.5 rounded-full text-[10px] tracking-[0.2em] uppercase transition-all duration-300 ${
+            className={`px-4 py-1.5 rounded-full text-[10px] tracking-[0.15em] uppercase transition-all duration-300 ${
               view === "map"
                 ? "bg-[var(--color-foreground)] text-white font-medium"
                 : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
             }`}
           >
-            Strava Map
+            Map
           </button>
           <button
             onClick={() => setView("story")}
-            className={`px-5 py-1.5 rounded-full text-[10px] tracking-[0.2em] uppercase transition-all duration-300 ${
+            className={`px-4 py-1.5 rounded-full text-[10px] tracking-[0.15em] uppercase transition-all duration-300 ${
               view === "story"
                 ? "bg-[var(--color-foreground)] text-white font-medium"
                 : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
@@ -66,7 +78,18 @@ export default function JourneyView({ meetings }: Props) {
       {/* Content */}
       <div className="flex-1 w-full relative min-h-[400px]">
         <AnimatePresence mode="wait">
-          {view === "map" ? (
+          {view === "strava" ? (
+            <motion.div
+              key="strava"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.25 }}
+              className="w-full"
+            >
+              <StravaCardVisual meetings={meetings} />
+            </motion.div>
+          ) : view === "map" ? (
             <motion.div
               key="map"
               initial={{ opacity: 0, x: -10 }}
