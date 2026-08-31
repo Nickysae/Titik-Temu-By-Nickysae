@@ -97,6 +97,7 @@ export default async function UsPage() {
           totalRindu={totalRindu}
           userACity={couple.userACity || me?.city || ""}
           userBCity={couple.userBCity || partnerUser?.city || ""}
+          coupleCreatedAt={couple.createdAt.toISOString()}
         />
       </div>
     </div>
