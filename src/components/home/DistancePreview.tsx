@@ -6,7 +6,7 @@ export default function DistancePreview({ distance }: { distance: number }) {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ delay: 0.3, duration: 1 }}
+      transition={{ delay: 0.05, duration: 0.4 }}
       className="flex flex-col items-center justify-center py-12 border-t border-b border-[var(--color-border)]/50 mx-10"
     >
       <h2 className="text-2xl font-light text-[var(--color-foreground)] tracking-wide">

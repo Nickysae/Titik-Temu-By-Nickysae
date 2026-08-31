@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
@@ -11,26 +12,28 @@ export interface SessionData {
   couple: any | null;
 }
 
-export async function getSession(): Promise<SessionData> {
+export const getSession = cache(async (): Promise<SessionData> => {
   const cookieStore = await cookies();
   const userId = cookieStore.get(USER_COOKIE)?.value || null;
   const coupleId = cookieStore.get(COUPLE_COOKIE)?.value || null;
 
   if (!userId || !coupleId) {
-    // Check if there is an active seed couple for initial fallback or return null
     return { userId: null, coupleId: null, user: null, couple: null };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
+  // Optimized single query: couple + members + relations in one single network roundtrip
   const couple = await prisma.couple.findUnique({
     where: { id: coupleId },
     include: {
-      members: { include: { user: true } },
-      meetings: { orderBy: { scheduledAt: "asc" } },
-      milestones: { orderBy: { date: "asc" } },
+      members: {
+        include: { user: true },
+      },
+      meetings: {
+        orderBy: { scheduledAt: "asc" },
+      },
+      milestones: {
+        orderBy: { date: "asc" },
+      },
       rinduJars: {
         include: {
           rindus: {
@@ -44,17 +47,24 @@ export async function getSession(): Promise<SessionData> {
     },
   });
 
+  if (!couple) {
+    return { userId: null, coupleId: null, user: null, couple: null };
+  }
+
+  // Extract user directly from couple members without a second DB roundtrip
+  const currentMember = couple.members.find((m) => m.userId === userId);
+  const user = currentMember?.user || null;
+
   return {
     userId,
     coupleId,
     user,
     couple,
   };
-}
+});
 
 export async function setSession(userId: string, coupleId: string) {
   const cookieStore = await cookies();
-  // 1 year expiration
   const oneYear = 60 * 60 * 24 * 365;
 
   cookieStore.set(USER_COOKIE, userId, {

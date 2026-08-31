@@ -12,7 +12,7 @@ export default function HeroCountdown({ daysLeft, dateStr, locationStr }: Props)
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex flex-col items-center justify-center py-12 my-2"
     >
       <p className="text-[10px] tracking-[0.25em] text-[var(--color-muted)] uppercase mb-8">Until we meet again</p>

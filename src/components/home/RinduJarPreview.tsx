@@ -7,7 +7,7 @@ export default function RinduJarPreview({ count }: { count: number }) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5, duration: 1 }}
+      transition={{ delay: 0.1, duration: 0.4 }}
       className="flex flex-col items-center justify-center py-12 pb-16"
     >
       <div className="text-4xl mb-6 opacity-90 drop-shadow-sm">🫙</div>

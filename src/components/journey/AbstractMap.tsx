@@ -56,7 +56,7 @@ export default function AbstractMap({ meetings }: Props) {
             strokeDasharray="2 2"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 2.5, ease: "easeInOut" }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
           />
         )}
 
