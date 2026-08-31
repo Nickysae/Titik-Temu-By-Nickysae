@@ -4,7 +4,14 @@ import { prisma } from "@/lib/prisma";
 // POST /api/meeting/verify - verify meeting, unlock Rindu Jar & create a milestone
 export async function POST(req: NextRequest) {
   try {
-    const couple = await prisma.couple.findFirst({
+    const { getSession } = await import("@/lib/session");
+    const session = await getSession();
+    if (!session.couple) {
+      return NextResponse.json({ error: "No couple found" }, { status: 404 });
+    }
+
+    const couple = await prisma.couple.findUnique({
+      where: { id: session.couple.id },
       include: {
         meetings: {
           where: { status: "PLANNED" },
