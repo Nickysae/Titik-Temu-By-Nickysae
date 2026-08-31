@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { MeetingItem } from "./JourneyTimeline";
 import { getCityCoordinates } from "@/lib/geo";
-import { Navigation, MapPin, Zap } from "lucide-react";
+import { Zap, Navigation2, Loader2 } from "lucide-react";
 
 interface Props {
   meetings: MeetingItem[];
@@ -13,8 +13,9 @@ export default function StravaRealMap({ meetings }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingItem | null>(null);
+  const [routeType, setRouteType] = useState<"road" | "straight" | "loading">("loading");
+  const [totalKm, setTotalKm] = useState(0);
 
-  // Sort chronological for route
   const sortedMeetings = [...meetings].sort(
     (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
   );
@@ -24,111 +25,130 @@ export default function StravaRealMap({ meetings }: Props) {
 
     let isMounted = true;
 
-    // Dynamically import Leaflet on client side
-    import("leaflet").then((L) => {
+    const initMap = async () => {
+      const L = await import("leaflet");
+
       if (!isMounted || !mapContainerRef.current) return;
 
-      // Clean up previous instance if exists
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
 
-      // Default center: East/Central Java
-      const defaultCenter: [number, number] = [-7.5, 112.0];
-
       const map = L.map(mapContainerRef.current, {
-        center: defaultCenter,
+        center: [-7.5, 112.0],
         zoom: 7.5,
-        zoomControl: false,
+        zoomControl: true,
         attributionControl: false,
       });
 
       mapInstanceRef.current = map;
 
-      // Minimalist Aesthetic Tile Layer (CartoDB Voyager)
+      // Minimalist CartoDB Voyager tile
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-        {
-          maxZoom: 18,
-          subdomains: "abcd",
-        }
+        { maxZoom: 18, subdomains: "abcd" }
       ).addTo(map);
 
-      // Extract points
-      const routePoints: [number, number][] = [];
-      const markers: any[] = [];
+      const markerCoords: [number, number][] = [];
 
+      // Add markers for each meeting
       sortedMeetings.forEach((m, index) => {
         const coords = getCityCoordinates(m.locationName, index);
-        routePoints.push(coords);
+        markerCoords.push(coords);
 
         const isUpcoming = m.status === "PLANNED";
-        const isLast = index === sortedMeetings.length - 1;
 
-        // Custom Minimalist Strava Marker Icon
         const markerHtml = `
-          <div class="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group">
-            ${
-              isUpcoming || isLast
-                ? '<div class="absolute w-8 h-8 rounded-full bg-orange-500/25 animate-ping"></div>'
-                : ""
-            }
-            <div class="w-6 h-6 rounded-full border-2 ${
-              isUpcoming
-                ? "bg-orange-500 border-white text-white shadow-lg"
-                : "bg-white border-[#36312d] text-[#36312d] shadow-sm"
-            } flex items-center justify-center text-[9px] font-bold tracking-tighter">
+          <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);">
+            ${isUpcoming ? `<div style="position:absolute;width:36px;height:36px;border-radius:50%;background:rgba(234,88,12,0.2);animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;"></div>` : ""}
+            <div style="width:28px;height:28px;border-radius:50%;border:2.5px solid ${isUpcoming ? "#ea580c" : "#36312d"};background:${isUpcoming ? "#ea580c" : "white"};color:${isUpcoming ? "white" : "#36312d"};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;transition:all .2s;">
               ${index + 1}
             </div>
-            <div class="absolute -bottom-5 px-1.5 py-0.5 rounded bg-black/75 text-white text-[8px] tracking-wider uppercase font-medium whitespace-nowrap opacity-90 pointer-events-none">
+            <div style="position:absolute;top:32px;background:rgba(0,0,0,0.78);color:white;padding:2px 7px;border-radius:20px;font-size:8px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;pointer-events:none;">
               ${m.locationName}
             </div>
-          </div>
-        `;
+          </div>`;
 
-        const customIcon = L.divIcon({
-          className: "custom-strava-marker",
+        const icon = L.divIcon({
+          className: "ors-strava-marker",
           html: markerHtml,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
 
-        const marker = L.marker(coords, { icon: customIcon }).addTo(map);
-
-        marker.on("click", () => {
-          setSelectedMeeting(m);
-        });
-
-        markers.push(marker);
+        L.marker(coords, { icon })
+          .addTo(map)
+          .on("click", () => setSelectedMeeting(m));
       });
 
-      // Draw Glowing Strava-style Polyline
-      if (routePoints.length > 1) {
-        // 1. Glow shadow line
-        L.polyline(routePoints, {
-          color: "#ea580c",
-          weight: 7,
-          opacity: 0.25,
-          lineCap: "round",
-          lineJoin: "round",
-        }).addTo(map);
-
-        // 2. Core glowing orange Strava track
-        const mainPolyline = L.polyline(routePoints, {
-          color: "#ea580c",
-          weight: 3.5,
-          opacity: 0.95,
-          dashArray: "4, 8",
-          lineCap: "round",
-          lineJoin: "round",
-        }).addTo(map);
-
-        // Fit map view to encompass all coordinates
-        const bounds = L.latLngBounds(routePoints);
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+      // Fit bounds first
+      if (markerCoords.length > 1) {
+        map.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50], maxZoom: 10 });
       }
-    });
+
+      // Fetch ORS road route
+      if (sortedMeetings.length >= 2) {
+        try {
+          const locations = sortedMeetings.map((m) => m.locationName);
+          const res = await fetch("/api/route", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ locations }),
+          });
+
+          const data = await res.json();
+          if (!isMounted) return;
+
+          const routeCoords: [number, number][] = data.coordinates;
+
+          if (data.type === "road" && data.distanceKm) {
+            setTotalKm(data.distanceKm);
+            setRouteType("road");
+          } else {
+            const fallback = sortedMeetings.reduce((total, m) => total + (m.distance || 0), 0);
+            setTotalKm(fallback);
+            setRouteType("straight");
+          }
+
+          // Glow shadow
+          L.polyline(routeCoords, {
+            color: "#ea580c",
+            weight: 10,
+            opacity: 0.15,
+            lineCap: "round",
+            lineJoin: "round",
+          }).addTo(map);
+
+          // Main Strava orange track
+          L.polyline(routeCoords, {
+            color: "#ea580c",
+            weight: 3.5,
+            opacity: 0.9,
+            dashArray: data.type === "road" ? undefined : "6, 10",
+            lineCap: "round",
+            lineJoin: "round",
+          }).addTo(map);
+
+          // Refit to route
+          if (routeCoords.length > 1) {
+            map.fitBounds(L.latLngBounds(routeCoords), { padding: [40, 40], maxZoom: 10 });
+          }
+        } catch (err) {
+          console.error("Route fetch error:", err);
+          if (!isMounted) return;
+          const fallback = sortedMeetings.reduce((total, m) => total + (m.distance || 0), 0);
+          setTotalKm(fallback);
+          setRouteType("straight");
+        }
+      } else {
+        const fallback = sortedMeetings.reduce((total, m) => total + (m.distance || 0), 0);
+        setTotalKm(fallback);
+        setRouteType("straight");
+      }
+    };
+
+    initMap();
 
     return () => {
       isMounted = false;
@@ -139,64 +159,98 @@ export default function StravaRealMap({ meetings }: Props) {
     };
   }, [meetings]);
 
-  const totalKm = sortedMeetings.reduce((acc, m) => acc + (m.distance || 0), 0);
-
   return (
-    <div className="w-full flex flex-col items-center relative mt-4 px-4 pb-6">
-      {/* Strava Activity Stats Floating Banner */}
-      <div className="w-full bg-[#1c1917] text-white rounded-2xl p-4 shadow-lg mb-3 flex items-center justify-between z-10 border border-stone-800">
+    <div className="w-full flex flex-col items-center px-4 pb-6">
+      {/* Strava Activity Stats Banner */}
+      <div className="w-full bg-[#1c1917] text-white rounded-2xl p-4 shadow-lg mb-3 flex items-center justify-between border border-stone-800">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center">
-            <Zap size={16} strokeWidth={2.5} />
+          <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <Zap size={18} strokeWidth={2.5} />
           </div>
           <div>
-            <p className="text-[9px] uppercase tracking-[0.2em] text-orange-400 font-medium">Strava Journey Route</p>
-            <h4 className="text-[14px] font-semibold tracking-wide text-white">
-              {totalKm.toLocaleString("id-ID")} KM Total Tracked
+            <p className="text-[9px] uppercase tracking-[0.25em] text-orange-400 font-medium mb-0.5">
+              Our Shared Distance
+            </p>
+            <h4 className="text-[15px] font-semibold tracking-wide text-white leading-none">
+              {routeType === "loading" ? (
+                <span className="flex items-center gap-1.5 text-stone-400">
+                  <Loader2 size={13} className="animate-spin" /> Kalkulasi Rute...
+                </span>
+              ) : (
+                `${totalKm.toLocaleString("id-ID")} KM`
+              )}
             </h4>
           </div>
         </div>
-        <div className="text-right">
-          <span className="text-[11px] font-mono text-stone-300 font-medium">
-            {sortedMeetings.length} Checkpoints
+
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-[11px] font-mono text-stone-300">
+            {sortedMeetings.length} Checkpoint{sortedMeetings.length > 1 ? "s" : ""}
           </span>
+          {routeType === "road" && (
+            <span className="flex items-center gap-1 text-[8px] uppercase tracking-wider text-emerald-400 font-medium">
+              <Navigation2 size={9} />
+              Road Route
+            </span>
+          )}
+          {routeType === "straight" && (
+            <span className="text-[8px] uppercase tracking-wider text-stone-500 font-medium">
+              Jarak Linear
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Interactive Map View */}
-      <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm border border-[var(--color-border)] relative bg-[var(--color-surface)]">
+      {/* Interactive Leaflet Map */}
+      <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-md border border-[var(--color-border)] relative bg-[var(--color-surface)]">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-        {/* Selected Checkpoint Card Overlay */}
+        {/* Loading Overlay */}
+        {routeType === "loading" && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10 pointer-events-none">
+            <Loader2 size={24} className="animate-spin text-orange-500" />
+            <p className="text-[11px] uppercase tracking-widest text-[var(--color-muted)]">
+              Menemukan Rute Jalan...
+            </p>
+          </div>
+        )}
+
+        {/* Checkpoint Detail Card */}
         {selectedMeeting && (
-          <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-sm p-3.5 rounded-2xl shadow-md border border-[var(--color-border)] z-20 flex justify-between items-center">
+          <div className="absolute bottom-3 left-3 right-3 bg-white/96 backdrop-blur-sm p-3.5 rounded-2xl shadow-lg border border-[var(--color-border)] z-20 flex justify-between items-start">
             <div>
-              <span className="text-[9px] uppercase tracking-widest text-orange-600 font-medium">
-                {selectedMeeting.status === "PLANNED" ? "Upcoming Destination" : "Completed Meeting"}
+              <span className={`text-[9px] uppercase tracking-widest font-semibold ${selectedMeeting.status === "PLANNED" ? "text-orange-500" : "text-[var(--color-brand)]"}`}>
+                {selectedMeeting.status === "PLANNED" ? "🧡 Rencana Pertemuan" : "✓ Pertemuan Selesai"}
               </span>
               <h5 className="text-[13px] font-medium text-[var(--color-foreground)] mt-0.5">
-                {selectedMeeting.title} · {selectedMeeting.locationName}
+                {selectedMeeting.title}
               </h5>
-              <p className="text-[10px] text-[var(--color-muted)]">
+              <p className="text-[11px] text-[var(--color-muted)] mt-0.5">
+                📍 {selectedMeeting.locationName} ·{" "}
                 {new Date(selectedMeeting.scheduledAt).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
                   year: "numeric",
-                })} · {selectedMeeting.distance} KM
+                })}
+              </p>
+              <p className="text-[10px] text-orange-500 font-medium mt-1">
+                ~{selectedMeeting.distance} KM dari rumah
               </p>
             </div>
             <button
               onClick={() => setSelectedMeeting(null)}
-              className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] hover:text-[var(--color-foreground)] px-2 py-1"
+              className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] hover:text-[var(--color-foreground)] px-2 py-1 ml-2 shrink-0"
             >
-              Tutup
+              ✕
             </button>
           </div>
         )}
       </div>
 
       <p className="text-[10px] text-[var(--color-muted)] italic font-light text-center mt-3">
-        Ketuk nomor checkpoint di peta untuk melihat detail pertemuan.
+        {routeType === "road"
+          ? "Rute mengikuti jalur jalan nyata via OpenRouteService."
+          : "Ketuk checkpoint di peta untuk melihat detail pertemuan."}
       </p>
     </div>
   );
