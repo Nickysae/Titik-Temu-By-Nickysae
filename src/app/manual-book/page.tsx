@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
-import { Printer, Sparkles, Heart, MapPin, QrCode, Lock, Globe, ExternalLink } from "lucide-react";
+import { Printer, Sparkles, ExternalLink } from "lucide-react";
+
+const QR_DATA_URL = "data:image/png;base64,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";
 
 export default function ManualBookPage() {
   const qrDataUrl = "data:image/png;base64,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";
@@ -239,32 +241,39 @@ export default function ManualBookPage() {
           </div>
 
           <div className="bg-gradient-to-br from-stone-900 to-stone-800 text-white rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm">
-            <div className="flex-1 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 bg-orange-500/20 border border-orange-500/40 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest text-orange-300 uppercase mb-2">
-                ✦ Developer & Creator ✦
+            <div className="flex-1 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+              <img
+                src="/docs/author-photo.jpg"
+                alt="Abdurrosyid Robbani"
+                className="w-16 h-16 rounded-full border-2 border-orange-500 object-cover shrink-0 shadow-md"
+              />
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-orange-500/20 border border-orange-500/40 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest text-orange-300 uppercase mb-2">
+                  ✦ Developer & Creator ✦
+                </div>
+                <h3 className="text-base font-bold text-white mb-1">
+                  Abdurrosyid Robbani
+                </h3>
+                <p className="text-[11.5px] text-stone-300 leading-relaxed mb-3">
+                  Aplikasi <strong>Titik Temu</strong> dirancang dan dikembangkan dengan cinta sebagai karya portofolio digital yang memadukan teknologi web modern, geolokasi presisi, dan pengalaman emosional bermakna untuk pasangan LDR.
+                </p>
+                <a
+                  href="https://abdurrosyid-portfolio.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-orange-300 hover:text-orange-200 underline decoration-dashed underline-offset-4"
+                >
+                  <span>abdurrosyid-portfolio.vercel.app</span>
+                  <ExternalLink size={11} />
+                </a>
               </div>
-              <h3 className="text-base font-bold text-white mb-1">
-                Abdur Rosyid
-              </h3>
-              <p className="text-[11.5px] text-stone-300 leading-relaxed mb-3">
-                Aplikasi <strong>Titik Temu</strong> dirancang dan dikembangkan dengan cinta sebagai karya portofolio digital yang memadukan teknologi web modern, geolokasi presisi, dan pengalaman emosional bermakna untuk pasangan LDR.
-              </p>
-              <a
-                href="https://abdurrosyid-portfolio.vercel.app/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-orange-300 hover:text-orange-200 underline decoration-dashed underline-offset-4"
-              >
-                <span>abdurrosyid-portfolio.vercel.app</span>
-                <ExternalLink size={11} />
-              </a>
             </div>
 
             {/* QR Code Block */}
             <div className="bg-white p-2.5 rounded-xl flex flex-col items-center justify-center text-center shrink-0 shadow-md">
               <img
                 src={qrDataUrl}
-                alt="Abdur Rosyid Portfolio QR"
+                alt="Abdurrosyid Robbani Portfolio QR"
                 className="w-24 h-24 object-contain block"
               />
               <span className="text-[8px] font-bold text-stone-900 uppercase tracking-wider mt-1 block">
@@ -278,7 +287,7 @@ export default function ManualBookPage() {
         <footer className="text-center pt-6 border-t border-stone-200 font-serif italic text-xs text-stone-500">
           "Jarak hanyalah jeda geografis, cinta kalian adalah garis yang tak pernah putus."<br />
           <strong className="not-italic font-sans text-[11px] text-stone-700 font-semibold mt-1 inline-block">
-            Titik Temu App — Created by Abdur Rosyid
+            Titik Temu App — Created by Abdurrosyid Robbani
           </strong>
         </footer>
       </div>
