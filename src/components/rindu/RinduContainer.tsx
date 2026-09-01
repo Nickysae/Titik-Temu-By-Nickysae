@@ -20,6 +20,10 @@ interface Props {
     createdAt: string;
     wordCount: number;
   } | null;
+  spaceCode?: string;
+  relationshipStart?: string | null;
+  cities?: string;
+  distanceKm?: number;
 }
 
 export default function RinduContainer({
@@ -32,6 +36,10 @@ export default function RinduContainer({
   meetingDate,
   rindus,
   latestRindu,
+  spaceCode = "TEMU",
+  relationshipStart,
+  cities = "LDR Space",
+  distanceKm = 450,
 }: Props) {
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
 
@@ -73,6 +81,11 @@ export default function RinduContainer({
         isOpen={isVerifyOpen}
         onClose={() => setIsVerifyOpen(false)}
         partnerName={nameB}
+        spaceCode={spaceCode}
+        relationshipStart={relationshipStart}
+        cities={cities}
+        distanceKm={distanceKm}
+        coupleName={`${nameA} & ${nameB}`}
       />
     </div>
   );

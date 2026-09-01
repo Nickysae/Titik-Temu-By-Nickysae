@@ -75,6 +75,10 @@ export default async function RinduPage() {
         meetingDate={meetingDateStr}
         rindus={jar?.status === "OPENED" ? rindus : []}
         latestRindu={latestRinduTeaser}
+        spaceCode={couple.inviteCode}
+        relationshipStart={couple.relationshipStart ? couple.relationshipStart.toISOString() : null}
+        cities={couple.userACity && couple.userBCity ? `${couple.userACity} ➔ ${couple.userBCity}` : "LDR Space"}
+        distanceKm={nextMeeting?.distance || 450}
       />
     </div>
   );

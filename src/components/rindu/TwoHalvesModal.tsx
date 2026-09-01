@@ -7,14 +7,30 @@ import jsQR from "jsqr";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
 
+import VintageBarcodeCard from "./VintageBarcodeCard";
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   partnerName: string;
+  coupleName?: string;
+  spaceCode?: string;
+  relationshipStart?: string | null;
+  cities?: string;
+  distanceKm?: number;
 }
 
-export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) {
-  const [tab, setTab] = useState<"my-half" | "scan-unite">("my-half");
+export default function TwoHalvesModal({
+  isOpen,
+  onClose,
+  partnerName,
+  coupleName = "You & Partner",
+  spaceCode = "TEMU",
+  relationshipStart,
+  cities = "LDR Space",
+  distanceKm = 450,
+}: Props) {
+  const [tab, setTab] = useState<"vintage-tag" | "my-half" | "scan-unite">("vintage-tag");
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [role, setRole] = useState<"LEFT" | "RIGHT">("LEFT");
   const [verifyState, setVerifyState] = useState<"idle" | "scanning" | "success" | "error">("idle");
@@ -230,27 +246,40 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
           </p>
         </div>
 
-        {/* Tab Selector: My Half vs Scan Unite */}
+        {/* Tab Selector: Tag Estetik vs My Half vs Scan Unite */}
         <div className="flex items-center bg-[var(--color-surface)] border border-[var(--color-border)] p-1 rounded-full mb-5">
+          <button
+            onClick={() => {
+              setTab("vintage-tag");
+              setCameraActive(false);
+            }}
+            className={`flex-1 py-1.5 rounded-full text-[9px] tracking-wider uppercase font-medium transition-all ${
+              tab === "vintage-tag"
+                ? "bg-[var(--color-foreground)] text-white shadow-sm"
+                : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+            }`}
+          >
+            🏷️ Tag Estetik
+          </button>
           <button
             onClick={() => {
               setTab("my-half");
               setCameraActive(false);
             }}
-            className={`flex-1 py-1.5 rounded-full text-[10px] tracking-wider uppercase font-medium transition-all ${
+            className={`flex-1 py-1.5 rounded-full text-[9px] tracking-wider uppercase font-medium transition-all ${
               tab === "my-half"
                 ? "bg-[var(--color-foreground)] text-white shadow-sm"
                 : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
             }`}
           >
-            Belahan Kuncimu
+            Belahan QR
           </button>
           <button
             onClick={() => {
               setTab("scan-unite");
               setCameraActive(true);
             }}
-            className={`flex-1 py-1.5 rounded-full text-[10px] tracking-wider uppercase font-medium transition-all ${
+            className={`flex-1 py-1.5 rounded-full text-[9px] tracking-wider uppercase font-medium transition-all ${
               tab === "scan-unite"
                 ? "bg-[#ea580c] text-white shadow-sm"
                 : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
@@ -259,6 +288,27 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
             Scan & Satukan
           </button>
         </div>
+
+        {/* TAB 0: Vintage Retail Tag Barcode Display */}
+        {tab === "vintage-tag" && (
+          <VintageBarcodeCard
+            coupleName={coupleName}
+            relationshipStart={relationshipStart}
+            spaceCode={spaceCode}
+            distanceKm={distanceKm}
+            cities={cities}
+            onRefresh={async () => {
+              try {
+                const res = await fetch("/api/pair/refresh", { method: "POST" });
+                if (res.ok) {
+                  alert("✨ Token berhasil diperpanjang 30 hari! Kunci fisik Anda tetap aktif.");
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+          />
+        )}
 
         {/* TAB 1: Display Split Half QR Code & Download Actions */}
         {tab === "my-half" && (
@@ -342,7 +392,25 @@ export default function TwoHalvesModal({ isOpen, onClose, partnerName }: Props) 
               </button>
             </div>
 
-            <p className="text-[9px] text-[var(--color-muted)] italic font-light text-center mt-2.5 leading-snug">
+            {/* Refresh Token (Perpanjang 30 Hari) Action */}
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/pair/refresh", { method: "POST" });
+                  if (res.ok) {
+                    alert("✨ Token berhasil diperpanjang 30 hari! Kunci fisik Anda tetap aktif.");
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className="mt-2 text-[10px] text-[var(--color-brand)] hover:underline flex items-center gap-1 py-1 font-medium"
+            >
+              <RefreshCw size={11} />
+              <span>Perpanjang Masa Kunci (+30 Hari)</span>
+            </button>
+
+            <p className="text-[9px] text-[var(--color-muted)] italic font-light text-center mt-2 leading-snug">
               💡 Gambar HD transparan siap dicetak di casing HP, stiker, gantungan kunci, atau gelang couple!
             </p>
           </div>
