@@ -103,6 +103,28 @@ export default async function UsPage() {
           userBCity={couple.userBCity || partnerUser?.city || ""}
           coupleCreatedAt={couple.createdAt.toISOString()}
         />
+
+        {/* Manual Book & Portfolio Button */}
+        <div className="px-8 mt-6 mb-2">
+          <a
+            href="/manual-book"
+            target="_blank"
+            className="w-full py-3.5 px-4 bg-white border border-[var(--color-border)] rounded-2xl flex items-center justify-between text-stone-700 hover:text-[var(--color-brand)] hover:border-[var(--color-brand)] transition-all shadow-xs group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-lg">📖</span>
+              <div className="text-left">
+                <p className="text-[11px] font-semibold tracking-wide text-stone-800 group-hover:text-[var(--color-brand)] transition-colors">
+                  Buku Panduan & Creator
+                </p>
+                <p className="text-[9px] text-[var(--color-muted)]">
+                  Petunjuk lengkap & portofolio pengembang (Abdur Rosyid)
+                </p>
+              </div>
+            </div>
+            <span className="text-xs text-[var(--color-muted)] group-hover:text-[var(--color-brand)]">↗</span>
+          </a>
+        </div>
       </div>
     </div>
   );
