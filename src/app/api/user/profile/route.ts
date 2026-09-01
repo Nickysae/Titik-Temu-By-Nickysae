@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { uploadToSupabaseStorage } from "@/lib/supabase";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -11,12 +12,17 @@ export async function PATCH(req: NextRequest) {
 
     const { name, city, avatarUrl } = await req.json();
 
+    let publicAvatarUrl: string | null = avatarUrl;
+    if (avatarUrl && avatarUrl.startsWith("data:")) {
+      publicAvatarUrl = await uploadToSupabaseStorage(avatarUrl, "avatars");
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: session.userId },
       data: {
         ...(name && { name: name.trim() }),
         ...(city !== undefined && { city: city.trim() || null }),
-        ...(avatarUrl !== undefined && { avatarUrl: avatarUrl || null }),
+        ...(avatarUrl !== undefined && { avatarUrl: publicAvatarUrl }),
       },
     });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { uploadToSupabaseStorage } from "@/lib/supabase";
 
 // GET /api/rindu - get rindu for current session couple
 export async function GET() {
@@ -43,6 +44,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Content or photo is required" }, { status: 400 });
     }
 
+    // Upload to Supabase Storage if photo provided
+    let publicPhotoUrl: string | null = null;
+    if (photoUrl) {
+      publicPhotoUrl = await uploadToSupabaseStorage(photoUrl, "rindu");
+    }
+
     // Find active LOCKED jar for this couple
     let jar = await prisma.rinduJar.findFirst({
       where: { coupleId: session.coupleId, status: "LOCKED" },
@@ -60,7 +67,7 @@ export async function POST(req: NextRequest) {
         jarId: jar.id,
         authorId: session.userId,
         content: content?.trim() || "(Foto Kenangan)",
-        photoUrl: photoUrl || null,
+        photoUrl: publicPhotoUrl,
       },
       include: { author: true },
     });
