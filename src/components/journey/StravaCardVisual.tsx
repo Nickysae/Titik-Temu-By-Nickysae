@@ -7,9 +7,11 @@ import { toPng } from "html-to-image";
 
 interface Props {
   meetings: MeetingItem[];
+  userACity?: string | null;
+  userBCity?: string | null;
 }
 
-export default function StravaCardVisual({ meetings }: Props) {
+export default function StravaCardVisual({ meetings, userACity, userBCity }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [totalKm, setTotalKm] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,18 +28,22 @@ export default function StravaCardVisual({ meetings }: Props) {
 
     async function fetchAndComputeRoute() {
       setIsLoading(true);
+
+      const cityA = userACity || "Jakarta";
+      const cityB = userBCity || "Surabaya";
+
+      // If no meetings yet, draw the baseline LDR route between City A and City B
+      let locations: string[] = [];
       if (sortedMeetings.length === 0) {
-        setIsLoading(false);
-        return;
+        locations = [cityA, cityB];
+      } else if (sortedMeetings.length === 1) {
+        locations = [cityA, sortedMeetings[0].locationName, cityB];
+      } else {
+        locations = sortedMeetings.map((m) => m.locationName);
       }
 
-      // Default fallback distance directly from registered meetings
+      // Default fallback distance directly from registered meetings or direct distance
       const fallbackKm = sortedMeetings.reduce((acc, m) => acc + (m.distance || 0), 0);
-      
-      // If there is only 1 meeting, calculate real route from origin city to meeting city
-      const locations = sortedMeetings.length === 1
-        ? ["Surabaya", sortedMeetings[0].locationName]
-        : sortedMeetings.map((m) => m.locationName);
       
       let rawPoints: [number, number][] = locations.map((loc, i) =>
         getCityCoordinates(loc, i)
@@ -273,15 +279,29 @@ export default function StravaCardVisual({ meetings }: Props) {
 
         {/* Checkpoint Location Pills */}
         <div className="w-full flex flex-wrap justify-center gap-1.5 mt-3 mb-8">
-          {sortedMeetings.map((m, i) => (
-            <span
-              key={m.id || i}
-              className="bg-stone-50 text-stone-600 text-[10px] px-3 py-1 rounded-full border border-stone-200 tracking-wider flex items-center gap-1.5 font-medium"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#fc4c02]"></span>
-              {m.locationName}
-            </span>
-          ))}
+          {sortedMeetings.length > 0 ? (
+            sortedMeetings.map((m, i) => (
+              <span
+                key={m.id || i}
+                className="bg-stone-50 text-stone-600 text-[10px] px-3 py-1 rounded-full border border-stone-200 tracking-wider flex items-center gap-1.5 font-medium"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fc4c02]"></span>
+                {m.locationName}
+              </span>
+            ))
+          ) : (
+            <>
+              <span className="bg-stone-50 text-stone-600 text-[10px] px-3 py-1 rounded-full border border-stone-200 tracking-wider flex items-center gap-1.5 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fc4c02]"></span>
+                {userACity || "Kota Kamu"}
+              </span>
+              <span className="text-stone-300 text-xs self-center">➔</span>
+              <span className="bg-stone-50 text-stone-600 text-[10px] px-3 py-1 rounded-full border border-stone-200 tracking-wider flex items-center gap-1.5 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fc4c02]"></span>
+                {userBCity || "Kota Pasangan"}
+              </span>
+            </>
+          )}
         </div>
 
         {/* 5. Official Bold STRAVA Logo */}

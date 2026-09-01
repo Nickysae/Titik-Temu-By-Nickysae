@@ -7,9 +7,11 @@ import { Zap, Navigation2, Loader2 } from "lucide-react";
 
 interface Props {
   meetings: MeetingItem[];
+  userACity?: string | null;
+  userBCity?: string | null;
 }
 
-export default function StravaRealMap({ meetings }: Props) {
+export default function StravaRealMap({ meetings, userACity, userBCity }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingItem | null>(null);
@@ -52,47 +54,89 @@ export default function StravaRealMap({ meetings }: Props) {
 
       const markerCoords: [number, number][] = [];
 
-      // Add markers for each meeting
-      sortedMeetings.forEach((m, index) => {
-        const coords = getCityCoordinates(m.locationName, index);
-        markerCoords.push(coords);
+      const cityA = userACity || "Jakarta";
+      const cityB = userBCity || "Surabaya";
 
-        const isUpcoming = m.status === "PLANNED";
-        // Show clean first pinpoint name on map (e.g. "Brengkok, Brondong, Lamongan" -> "Brengkok")
-        const shortPinLabel = m.locationName.split(",")[0].replace(/^(desa|kelurahan|kel\.|kecamatan|kec\.)\s+/i, "").trim() || m.locationName;
+      // If no meetings, render markers for the two cities
+      if (sortedMeetings.length === 0) {
+        const pinLocations = [
+          { name: cityA, label: "Rumah Kamu" },
+          { name: cityB, label: "Rumah Pasangan" },
+        ];
 
-        const markerHtml = `
-          <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);">
-            ${isUpcoming ? `<div style="position:absolute;width:36px;height:36px;border-radius:50%;background:rgba(234,88,12,0.2);animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;"></div>` : ""}
-            <div style="width:28px;height:28px;border-radius:50%;border:2.5px solid ${isUpcoming ? "#ea580c" : "#36312d"};background:${isUpcoming ? "#ea580c" : "white"};color:${isUpcoming ? "white" : "#36312d"};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;transition:all .2s;">
-              ${index + 1}
-            </div>
-            <div style="position:absolute;top:32px;background:rgba(0,0,0,0.78);color:white;padding:2px 7px;border-radius:20px;font-size:8px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;pointer-events:none;">
-              ${shortPinLabel}
-            </div>
-          </div>`;
+        pinLocations.forEach((loc, index) => {
+          const coords = getCityCoordinates(loc.name, index);
+          markerCoords.push(coords);
 
-        const icon = L.divIcon({
-          className: "ors-strava-marker",
-          html: markerHtml,
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
+          const markerHtml = `
+            <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);">
+              <div style="width:28px;height:28px;border-radius:50%;border:2.5px solid #ea580c;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.18);">
+                ${index === 0 ? "A" : "B"}
+              </div>
+              <div style="position:absolute;top:32px;background:rgba(0,0,0,0.85);color:white;padding:2px 8px;border-radius:20px;font-size:9px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;pointer-events:none;">
+                ${loc.name}
+              </div>
+            </div>`;
+
+          const icon = L.divIcon({
+            className: "ors-strava-marker",
+            html: markerHtml,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+          });
+
+          L.marker(coords, { icon }).addTo(map);
         });
+      } else {
+        // Add markers for each meeting
+        sortedMeetings.forEach((m, index) => {
+          const coords = getCityCoordinates(m.locationName, index);
+          markerCoords.push(coords);
 
-        L.marker(coords, { icon })
-          .addTo(map)
-          .on("click", () => setSelectedMeeting(m));
-      });
+          const isUpcoming = m.status === "PLANNED";
+          const shortPinLabel = m.locationName.split(",")[0].replace(/^(desa|kelurahan|kel\.|kecamatan|kec\.)\s+/i, "").trim() || m.locationName;
+
+          const markerHtml = `
+            <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);">
+              ${isUpcoming ? `<div style="position:absolute;width:36px;height:36px;border-radius:50%;background:rgba(234,88,12,0.2);animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;"></div>` : ""}
+              <div style="width:28px;height:28px;border-radius:50%;border:2.5px solid ${isUpcoming ? "#ea580c" : "#36312d"};background:${isUpcoming ? "#ea580c" : "white"};color:${isUpcoming ? "white" : "#36312d"};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;transition:all .2s;">
+                ${index + 1}
+              </div>
+              <div style="position:absolute;top:32px;background:rgba(0,0,0,0.78);color:white;padding:2px 7px;border-radius:20px;font-size:8px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;pointer-events:none;">
+                ${shortPinLabel}
+              </div>
+            </div>`;
+
+          const icon = L.divIcon({
+            className: "ors-strava-marker",
+            html: markerHtml,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+          });
+
+          L.marker(coords, { icon })
+            .addTo(map)
+            .on("click", () => setSelectedMeeting(m));
+        });
+      }
 
       // Fit bounds first
       if (markerCoords.length > 1) {
         map.fitBounds(L.latLngBounds(markerCoords), { padding: [50, 50], maxZoom: 10 });
       }
 
-      // Fetch ORS road route
-      if (sortedMeetings.length >= 2) {
+      // Determine locations to fetch road route
+      let locations: string[] = [];
+      if (sortedMeetings.length === 0) {
+        locations = [cityA, cityB];
+      } else if (sortedMeetings.length === 1) {
+        locations = [cityA, sortedMeetings[0].locationName, cityB];
+      } else {
+        locations = sortedMeetings.map((m) => m.locationName);
+      }
+
+      if (locations.length >= 2) {
         try {
-          const locations = sortedMeetings.map((m) => m.locationName);
           const res = await fetch("/api/route", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -102,7 +146,7 @@ export default function StravaRealMap({ meetings }: Props) {
           const data = await res.json();
           if (!isMounted) return;
 
-          const routeCoords: [number, number][] = data.coordinates;
+          const routeCoords: [number, number][] = data.coordinates || markerCoords;
 
           if (data.type === "road" && data.distanceKm) {
             setTotalKm(data.distanceKm);

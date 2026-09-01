@@ -52,7 +52,11 @@ export default async function JourneyPage() {
       </header>
 
       {/* Journey Views */}
-      <JourneyView meetings={couple.meetings} />
+      <JourneyView
+        meetings={couple.meetings}
+        userACity={couple.userACity || (couple.members[0]?.user?.city ?? null)}
+        userBCity={couple.userBCity || (couple.members[1]?.user?.city ?? null)}
+      />
 
       {/* Summary Footer */}
       <div className="mt-auto px-8 py-6 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-10 relative">

@@ -23,9 +23,11 @@ const StravaRealMap = dynamic(() => import("./StravaRealMap"), {
 
 interface Props {
   meetings: MeetingItem[];
+  userACity?: string | null;
+  userBCity?: string | null;
 }
 
-export default function JourneyView({ meetings }: Props) {
+export default function JourneyView({ meetings, userACity, userBCity }: Props) {
   const [view, setView] = useState<"strava" | "map" | "story">("strava");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
@@ -87,7 +89,7 @@ export default function JourneyView({ meetings }: Props) {
               transition={{ duration: 0.25 }}
               className="w-full"
             >
-              <StravaCardVisual meetings={meetings} />
+              <StravaCardVisual meetings={meetings} userACity={userACity} userBCity={userBCity} />
             </motion.div>
           ) : view === "map" ? (
             <motion.div
@@ -98,7 +100,7 @@ export default function JourneyView({ meetings }: Props) {
               transition={{ duration: 0.3 }}
               className="w-full"
             >
-              <StravaRealMap meetings={meetings} />
+              <StravaRealMap meetings={meetings} userACity={userACity} userBCity={userBCity} />
             </motion.div>
           ) : (
             <motion.div
