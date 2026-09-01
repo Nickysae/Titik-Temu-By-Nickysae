@@ -58,6 +58,8 @@ export default function StravaRealMap({ meetings }: Props) {
         markerCoords.push(coords);
 
         const isUpcoming = m.status === "PLANNED";
+        // Show clean first pinpoint name on map (e.g. "Brengkok, Brondong, Lamongan" -> "Brengkok")
+        const shortPinLabel = m.locationName.split(",")[0].replace(/^(desa|kelurahan|kel\.|kecamatan|kec\.)\s+/i, "").trim() || m.locationName;
 
         const markerHtml = `
           <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);">
@@ -66,7 +68,7 @@ export default function StravaRealMap({ meetings }: Props) {
               ${index + 1}
             </div>
             <div style="position:absolute;top:32px;background:rgba(0,0,0,0.78);color:white;padding:2px 7px;border-radius:20px;font-size:8px;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;pointer-events:none;">
-              ${m.locationName}
+              ${shortPinLabel}
             </div>
           </div>`;
 

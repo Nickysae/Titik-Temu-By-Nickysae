@@ -13,6 +13,17 @@ interface Props {
   partnerName: string;
 }
 
+// Helper function to extract clean primary pinpoint label (e.g. "Brengkok, Brondong, Lamongan" -> "Brengkok" or "Lamongan")
+function getShortCityName(fullName: string): string {
+  if (!fullName) return "";
+  const parts = fullName.split(",").map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return fullName;
+  // Return the first distinct pinpoint name (e.g. "Brengkok" or "Lamongan")
+  // If first part has "Desa " / "Kel. ", clean it up for the compact pill
+  const first = parts[0].replace(/^(desa|kelurahan|kel\.|kecamatan|kec\.)\s+/i, "");
+  return first || parts[0];
+}
+
 export default function DistancePreview({
   distance,
   userACity,
@@ -25,6 +36,10 @@ export default function DistancePreview({
   const [newCity, setNewCity] = useState(myCity || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  const shortCityA = getShortCityName(userACity) || "Kota Kamu";
+  const shortCityB = getShortCityName(userBCity) || "Kota Pasangan";
+  const shortMyCity = getShortCityName(myCity);
 
   const handleUpdateCity = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,13 +86,19 @@ export default function DistancePreview({
           <div className="w-2 h-2 rounded-full bg-[var(--color-brand)] z-10 shadow-xs" />
         </div>
 
-        {/* Dynamic City Names + Quick Edit Button */}
+        {/* Dynamic Clean Pinpoint Names */}
         <div className="w-full flex items-center justify-between mt-3 px-1 max-w-[240px]">
-          <span className="text-[11px] font-medium text-[var(--color-foreground)] tracking-wide">
-            {userACity || "Kota Kamu"}
+          <span
+            className="text-[11px] font-medium text-[var(--color-foreground)] tracking-wide truncate max-w-[110px]"
+            title={userACity}
+          >
+            {shortCityA}
           </span>
-          <span className="text-[11px] font-medium text-[var(--color-brand)] tracking-wide">
-            {userBCity || "Kota Pasangan"}
+          <span
+            className="text-[11px] font-medium text-[var(--color-brand)] tracking-wide truncate max-w-[110px] text-right"
+            title={userBCity}
+          >
+            {shortCityB}
           </span>
         </div>
 
@@ -90,7 +111,7 @@ export default function DistancePreview({
           className="mt-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[9px] uppercase tracking-wider text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:border-[var(--color-brand)] transition-all shadow-xs"
         >
           <MapPin size={10} className="text-[var(--color-brand)]" />
-          <span>Ganti Kotaku ({myCity || "Atur"})</span>
+          <span>Ganti Lokasiku ({shortMyCity || "Atur"})</span>
         </button>
       </motion.div>
 
