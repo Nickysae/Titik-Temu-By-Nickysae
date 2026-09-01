@@ -280,7 +280,7 @@
       color: var(--dark);
     }
 
-    /* Right Column Cards (Clean Minimalist Style) */
+    /* Right Column Cards */
     .feature-list {
       display: flex;
       flex-direction: column;
@@ -368,7 +368,7 @@
       margin-bottom: 4px;
     }
 
-    /* Bottom Action Button Bar (Directly Inspired by Reference) */
+    /* Bottom Action Button Bar */
     .bottom-bar {
       display: flex;
       align-items: center;
@@ -417,22 +417,22 @@
       color: #FFFFFF;
       border: 2px solid var(--border-dark);
       border-radius: 18px;
-      padding: 16px 20px;
+      padding: 18px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 18px;
+      gap: 20px;
       margin-top: 8px;
     }
     .dev-profile-wrap {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       flex: 1;
     }
     .dev-avatar {
-      width: 68px;
-      height: 68px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       border: 3px solid var(--brand-yellow);
       object-fit: cover;
@@ -445,7 +445,7 @@
       border: 1px solid rgba(255, 184, 0, 0.4);
       padding: 2px 8px;
       border-radius: 20px;
-      font-size: 8px;
+      font-size: 8.5px;
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -456,45 +456,47 @@
       font-size: 16px;
       font-weight: 700;
       color: #FFFFFF;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .dev-bio {
-      font-size: 10px;
+      font-size: 10.5px;
       color: #A1A1AA;
       line-height: 1.4;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       max-width: 440px;
     }
     .dev-link {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--brand-yellow);
       text-decoration: none;
       border-bottom: 1px dashed var(--brand-yellow);
-      padding-bottom: 1px;
+      padding-bottom: 2px;
     }
     .dev-qr-box {
       background: #FFFFFF;
-      padding: 8px 10px;
-      border-radius: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .dev-qr-img {
-      width: 68px;
-      height: 68px;
+      width: 82px;
+      height: 82px;
       display: block;
+      image-rendering: pixelated;
     }
     .dev-qr-label {
-      font-size: 7.5px;
+      font-size: 8px;
       font-weight: 800;
       color: var(--dark);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-top: 3px;
+      margin-top: 4px;
     }
 
     code {
@@ -900,9 +902,9 @@
               </div>
             </div>
 
-            <!-- QR Code -->
+            <!-- QR Code Box (Sharp Scannable) -->
             <div class="dev-qr-box">
-              <img src="data:image/png;base64,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" alt="QR Portofolio" class="dev-qr-img" />
+              <img src="data:image/png;base64,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" alt="QR Barcode Portofolio Abdurrosyid Robbani" class="dev-qr-img" />
               <span class="dev-qr-label">Scan Portfolio</span>
             </div>
           </div>
