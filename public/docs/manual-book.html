@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buku Panduan Pengguna - Titik Temu</title>
+  <title>Buku Panduan Pengguna (Manual Book) - Titik Temu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     @page {
-      size: A4;
-      margin: 18mm 16mm 18mm 16mm;
+      size: A4 landscape;
+      margin: 0;
     }
     * {
       box-sizing: border-box;
@@ -19,51 +19,33 @@
     }
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      color: #292524;
-      background-color: #fcfbf9;
-      line-height: 1.6;
-      font-size: 13px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      color: #1c1917;
+      background-color: #f5f5f4;
+      line-height: 1.45;
+      font-size: 12px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .page-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 40px 48px;
-      border: 1px solid #e7e5e4;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-    }
-    @media print {
-      body { background: white; }
-      .page-container {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        max-width: 100%;
-      }
-      .no-print { display: none !important; }
-      .page-break { page-break-before: always; }
-    }
+
+    /* Print Controls */
     .print-bar {
       position: fixed;
       top: 16px;
       right: 16px;
-      z-index: 1000;
+      z-index: 9999;
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
     .btn-print {
       background: #ea580c;
-      color: white;
+      color: #ffffff;
       border: none;
       padding: 10px 20px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 600;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -73,357 +55,529 @@
       background: #c2410c;
       transform: translateY(-1px);
     }
-    
-    /* Cover / Header Hero */
-    .header-hero {
-      text-align: center;
-      padding: 32px 20px 28px 20px;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fef3c7 100%);
-      border-radius: 18px;
-      border: 1px solid #fed7aa;
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-    .header-hero::after {
-      content: "TEMU";
-      position: absolute;
-      right: -20px;
-      bottom: -25px;
-      font-size: 100px;
-      font-weight: 900;
-      color: rgba(234, 88, 12, 0.05);
-      letter-spacing: -4px;
-      pointer-events: none;
-    }
-    .brand-badge {
-      display: inline-flex;
+
+    /* Main Container with A4 Landscape Pages */
+    .booklet-container {
+      padding: 30px 20px 60px 20px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
-      background: #ffffff;
-      border: 1px solid #fdba74;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.2em;
-      color: #ea580c;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.08);
-    }
-    .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 30px;
-      color: #1c1917;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
-    }
-    .hero-subtitle {
-      font-size: 13px;
-      color: #78716c;
-      font-weight: 400;
-      max-width: 520px;
-      margin: 0 auto;
+      gap: 30px;
     }
 
-    /* Section Cards */
-    .section-block {
-      margin-bottom: 26px;
+    .a4-sheet {
+      width: 297mm;
+      height: 210mm;
+      max-height: 210mm;
+      background: #ffffff;
+      padding: 12mm 15mm;
+      box-sizing: border-box;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e7e5e4;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      page-break-after: always;
+      break-after: page;
     }
-    .section-title-wrap {
+
+    /* Sheet Header Bar */
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #f5f5f4;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
-      border-bottom: 2px solid #f5f5f4;
-      padding-bottom: 8px;
-      margin-bottom: 14px;
     }
-    .section-number {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
+    .brand-pill {
       background: #ea580c;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
     }
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
+    .sheet-title-text {
+      font-size: 14px;
+      font-weight: 800;
       color: #1c1917;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
     }
-    
-    .grid-2 {
+    .page-index-badge {
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-size: 11px;
+      font-weight: 900;
+      color: #78716c;
+      letter-spacing: 0.1em;
+      background: #f5f5f4;
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid #e7e5e4;
+    }
+
+    /* Grid Layouts */
+    .grid-2-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
-      margin-bottom: 12px;
+      flex: 1;
     }
-    .card {
+    .grid-3-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Common Card Styles */
+    .info-card {
       background: #fafaf9;
       border: 1px solid #e7e5e4;
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 6px;
     }
-    .card-title {
-      font-size: 12px;
+    .card-accent {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid #fed7aa;
+    }
+    .card-dark {
+      background: #18181b;
+      color: #ffffff;
+      border: 1px solid #27272a;
+    }
+
+    .section-badge-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .num-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: #ea580c;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1c1917;
+      letter-spacing: -0.2px;
+    }
+
+    .step-box {
+      background: #ffffff;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      padding: 9px 11px;
+      margin-bottom: 6px;
+    }
+    .step-title {
+      font-size: 11px;
       font-weight: 700;
       color: #ea580c;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
-    .card ol, .card ul {
-      padding-left: 18px;
-      font-size: 12px;
+    .step-desc {
+      font-size: 11px;
       color: #44403c;
+      line-height: 1.4;
     }
-    .card li {
+
+    .feature-item {
+      background: #ffffff;
+      border-left: 3px solid #ea580c;
+      border-top: 1px solid #e7e5e4;
+      border-right: 1px solid #e7e5e4;
+      border-bottom: 1px solid #e7e5e4;
+      border-radius: 6px;
+      padding: 7px 10px;
       margin-bottom: 6px;
     }
-    .card li:last-child {
-      margin-bottom: 0;
-    }
-
-    .feature-box {
-      background: #ffffff;
-      border: 1px solid #e7e5e4;
-      border-left: 4px solid #ea580c;
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-    }
-    .feature-box h4 {
-      font-size: 13px;
+    .feature-item-title {
+      font-size: 11px;
       font-weight: 700;
       color: #1c1917;
-      margin-bottom: 3px;
-    }
-    .feature-box p {
-      font-size: 12px;
-      color: #57534e;
-      line-height: 1.5;
-    }
-
-    .highlight-banner {
-      background: #fefce8;
-      border: 1px dashed #facc15;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 12px;
-      color: #854d0e;
-      margin-top: 14px;
+      margin-bottom: 2px;
       display: flex;
-      align-items: flex-start;
-      gap: 8px;
+      align-items: center;
+      gap: 5px;
+    }
+    .feature-item-desc {
+      font-size: 10.5px;
+      color: #57534e;
+      line-height: 1.35;
     }
 
-    .footer-quote {
-      text-align: center;
-      padding-top: 24px;
-      margin-top: 28px;
-      border-top: 1px solid #e7e5e4;
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      color: #78716c;
-      font-size: 13px;
+    /* Sheet Footer Bar */
+    .sheet-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f5f5f4;
+      padding-top: 6px;
+      margin-top: 6px;
+      font-size: 9.5px;
+      color: #a8a29e;
+      font-weight: 500;
+    }
+
+    /* Code Pill */
+    code {
+      font-family: monospace;
+      background: #f5f5f4;
+      color: #ea580c;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      border: 1px solid #e7e5e4;
+    }
+
+    /* Print Mode Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .booklet-container {
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+      .a4-sheet {
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        max-height: 210mm !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 10mm 14mm !important;
+      }
+    }
+
+    /* Responsive for Small Screens */
+    @media screen and (max-width: 1100px) {
+      .a4-sheet {
+        width: 100%;
+        height: auto;
+        max-height: none;
+      }
+      .grid-2-cols {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- Floating Print Trigger -->
   <div class="print-bar no-print">
     <button class="btn-print" onclick="window.print()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-      Cetak / Simpan PDF
+      🖨️ Cetak / Simpan PDF (A4 Landscape)
     </button>
   </div>
 
-  <div class="page-container">
-    <!-- Header Hero -->
-    <div class="header-hero">
-      <div class="brand-badge">
-        <span>✦</span> TITIK • TEMU <span>✦</span>
-      </div>
-      <h1 class="hero-title">Panduan Pengguna</h1>
-      <p class="hero-subtitle">Jarak Menjadi Cerita, Rindu Menjadi Makna — Panduan Lengkap Ruang Privat Pasangan LDR</p>
-    </div>
+  <div class="booklet-container">
 
-    <!-- 1. Memulai & Menghubungkan -->
-    <div class="section-block">
-      <div class="section-title-wrap">
-        <div class="section-number">1</div>
-        <h2 class="section-title">Memulai & Menghubungkan Ruang Pasangan</h2>
-      </div>
-      <p style="font-size: 12.5px; color: #57534e; margin-bottom: 12px;">
-        Titik Temu beroperasi sebagai <strong>Private Space 2 Orang</strong> yang dilindungi oleh Kode Ruang Eksklusif dan 4-Digit PIN Rahasia.
-      </p>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Langkah A: Pembuat Ruang (Creator)</div>
-          <ol>
-            <li>Buka website Titik Temu di browser.</li>
-            <li>Ketik <strong>Nama</strong> & <strong>Lokasi/Kota</strong> (contoh: <em>Desa Brengkok, Brondong, Lamongan</em>).</li>
-            <li>Buat <strong>4-Digit PIN Rahasia</strong> (contoh: <code>1234</code>).</li>
-            <li>Klik <strong>"Buat Ruang Kita"</strong>.</li>
-            <li>Salin <strong>Kode Ruang</strong> (misal <code>TEMU-8821</code>) & bagikan ke pasangan beserta PIN.</li>
-          </ol>
+    <!-- ==================== SHEET 1 / 3 ==================== -->
+    <div class="a4-sheet">
+      <div>
+        <div class="sheet-header">
+          <div class="brand-group">
+            <span class="brand-pill">✦ TITIK • TEMU ✦</span>
+            <span class="sheet-title-text">Buku Panduan Pengguna (Manual Book)</span>
+          </div>
+          <span class="page-index-badge">/// 01 — MEMULAI</span>
         </div>
 
-        <div class="card">
-          <div class="card-title">Langkah B: Pasangan (Partner)</div>
-          <ol>
-            <li>Buka website Titik Temu di HP pasangan.</li>
-            <li>Ketik <strong>Nama</strong> & <strong>Lokasi/Kota</strong> kamu.</li>
-            <li>Masukkan <strong>Kode Ruang</strong> dari pasangan & <strong>4-Digit PIN</strong>.</li>
-            <li>Klik <strong>"Sambungkan Dua Keping"</strong>.</li>
-            <li>🎉 Ruang cinta kalian resmi tersambung dan aktif seketika!</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Menu Home -->
-    <div class="section-block">
-      <div class="section-title-wrap">
-        <div class="section-number">2</div>
-        <h2 class="section-title">Fitur Utama di Menu Beranda (Home)</h2>
-      </div>
-
-      <div class="feature-box">
-        <h4>⏳ Days Together & Countdown Pertemuan</h4>
-        <p>Menghitung hari kebersamaan secara otomatis sejak tanggal jadian serta menampilkan hitung mundur menuju jadwal kencan berikutnya.</p>
-      </div>
-
-      <div class="feature-box">
-        <h4>📍 Distance Between You Two & Pindah Kota</h4>
-        <p>Menghitung jarak KM nyata antar desa/kecamatan kalian secara otomatis. Tekan tombol <strong>"Ganti Lokasiku"</strong> kapan saja jika berpindah domisili.</p>
-      </div>
-
-      <div class="feature-box">
-        <h4>💬 Daily Connection Question</h4>
-        <p>Satu pertanyaan romantis mendalam setiap hari. Jawaban pasangan baru akan terbuka setelah kalian berdua sama-sama mengisi!</p>
-      </div>
-    </div>
-
-    <div class="page-break"></div>
-
-    <!-- 3. Menu Rindu & Barcode -->
-    <div class="section-block" style="margin-top: 12px;">
-      <div class="section-title-wrap">
-        <div class="section-number">3</div>
-        <h2 class="section-title">Amplop Rindu & Kunci Fisik Barcode</h2>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">💌 Menulis Surat & Foto Rindu</div>
-          <p style="font-size: 12px; color: #44403c; margin-bottom: 8px;">
-            Tulis pesan atau lampirkan foto kenangan. Klik <strong>"Segel Surat"</strong>. Pesan tersimpan rahasia di cloud dan <em>tidak bisa dibaca siapapun</em> sebelum kalian bertemu di dunia nyata.
-          </p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">🔑 Buka Segel Saat Bertemu (Two Halves)</div>
-          <p style="font-size: 12px; color: #44403c; margin-bottom: 8px;">
-            Saat bertemu fisik, klik <strong>"Verify Meeting"</strong>. Pasangan A memilih <em>Belahan Kiri</em> dan Pasangan B memilih <em>Belahan Kanan</em>, satukan layar kedua HP lalu scan untuk membuka amplop serentak!
-          </p>
-        </div>
-      </div>
-
-      <div class="feature-box">
-        <h4>🏷️ Desain Kunci Fisik (Vintage Retail Tag)</h4>
-        <p>Di tab <em>Tag Estetik</em>, unduh desain label eksklusif berisi watermark Titik Temu, tanggal jadian, dan barcode unik. Desain siap dicetak untuk gantungan kunci akrilik atau stiker casing HP yang bisa dipindai berulang kali pada setiap pertemuan.</p>
-      </div>
-
-      <div class="feature-box">
-        <h4>🖼️ Kolase Kenangan & Perpanjang Masa Kunci (+30 Hari)</h4>
-        <p>Setelah surat terbuka, tekan <strong>"Buat & Unduh Kolase Kenangan"</strong> untuk mengabadikan seluruh surat & foto ke dalam satu poster kenangan. Jika belum sempat bertemu, tekan <strong>"Perpanjang Masa Kunci"</strong> agar kunci fisik tetap aktif tanpa harus mencetak ulang.</p>
-      </div>
-    </div>
-
-    <!-- 4. Menu Journey -->
-    <div class="section-block">
-      <div class="section-title-wrap">
-        <div class="section-number">4</div>
-        <h2 class="section-title">Peta Petualangan & Strava LDR (Journey)</h2>
-      </div>
-
-      <div class="feature-box">
-        <h4>🏃 Poster Strava LDR (Tab Strava)</h4>
-        <p>Menghitung total kilometer LDR, ritme pertemuan (<em>Pace</em>), dan menggambar rute oranye khas Strava di antara kedua kota. Klik <strong>"Simpan Gambar"</strong> atau <strong>"Pamerkan / Bagikan"</strong> untuk diunggah ke Instagram Story atau WhatsApp Status.</p>
-      </div>
-
-      <div class="feature-box">
-        <h4>🗺️ Peta Interaktif & Rencana Pertemuan (+ Plan)</h4>
-        <p>Menampilkan titik pin pulau dan rute jalan raya. Tekan tombol <strong>"+ Plan"</strong> di pojok kanan atas untuk menjadwalkan kencan baru lengkap dengan perhitungan jarak otomatis.</p>
-      </div>
-    </div>
-
-    <!-- 5. Keamanan & Re-Login -->
-    <div class="section-block">
-      <div class="section-title-wrap">
-        <div class="section-number">5</div>
-        <h2 class="section-title">Keamanan, Privasi & Masuk Kembali</h2>
-      </div>
-      <div class="highlight-banner">
-        <span>🔒</span>
-        <div>
-          <strong>Ganti Perangkat atau Browser Baru?</strong><br>
-          Data kalian tidak akan pernah hilang. Pada halaman depan, pilih menu <strong>"Masuk Kembali ke Ruang"</strong>, masukkan Kode Ruang (<code>TEMU-XXXX</code>), Nama terdaftar, dan 4-Digit PIN untuk membuka kembali ruang cinta kalian.
-        </div>
-      </div>
-    </div>
-
-    <!-- 6. Tentang Pengembang / Creator Space & Portfolio -->
-    <div class="section-block" style="margin-top: 24px;">
-      <div class="section-title-wrap">
-        <div class="section-number" style="background: #1c1917;">6</div>
-        <h2 class="section-title">Tentang Pembuat Aplikasi (About The Developer)</h2>
-      </div>
-      
-      <div style="background: linear-gradient(135deg, #1c1917 0%, #292524 100%); color: #ffffff; border-radius: 16px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);">
-        <div style="flex: 1; display: flex; align-items: center; gap: 16px;">
-          <img src="/docs/author-photo.jpg" alt="Abdurrosyid Robbani" style="width: 72px; height: 72px; border-radius: 50%; border: 3px solid #ea580c; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" />
-          <div>
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(234, 88, 12, 0.2); border: 1px solid rgba(234, 88, 12, 0.4); padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: 700; letter-spacing: 0.15em; color: #fdba74; text-transform: uppercase; margin-bottom: 6px;">
-              ✦ Developer & Creator ✦
+        <div class="grid-2-cols">
+          <!-- Col 1: Overview & Philosophy -->
+          <div class="info-card card-accent">
+            <div style="font-size: 10px; font-weight: 800; color: #ea580c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;">
+              Ruang Privat Eksklusif 2 Orang
             </div>
-            <h3 style="font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px; margin-bottom: 4px;">
-              Abdurrosyid Robbani
-            </h3>
-            <p style="font-size: 11.5px; color: #d6d3d1; line-height: 1.5; margin-bottom: 10px;">
-              Aplikasi <strong>Titik Temu</strong> dirancang dan dikembangkan dengan cinta sebagai karya portofolio digital yang memadukan teknologi web modern, geolokasi presisi, dan pengalaman pengguna emosional untuk pasangan LDR.
+            <h2 style="font-size: 17px; font-weight: 800; color: #1c1917; line-height: 1.25; margin-bottom: 6px;">
+              Jarak Menjadi Cerita,<br>Rindu Menjadi Makna
+            </h2>
+            <p style="font-size: 11px; color: #44403c; line-height: 1.45; margin-bottom: 8px;">
+              <strong>Titik Temu</strong> adalah web application romantis yang dirancang khusus untuk pasangan pejuang LDR (Long Distance Relationship). Menghubungkan dua insan melalui geolokasi presisi, penghitung hari jadian, amplop rindu yang terkunci dengan barcode fisik, dan rekapan rute perjalanan.
             </p>
-            <a href="https://abdurrosyid-portfolio.vercel.app/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #fdba74; text-decoration: none; border-bottom: 1px dashed #fdba74; padding-bottom: 2px;">
-              🌐 abdurrosyid-portfolio.vercel.app ↗
-            </a>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.8); padding: 6px 9px; border-radius: 6px; border: 1px solid #fed7aa;">
+                <span style="font-size: 14px;">🔒</span>
+                <div>
+                  <strong style="font-size: 10.5px; color: #1c1917;">100% Privat & Terenkripsi</strong>
+                  <p style="font-size: 10px; color: #57534e; margin: 0;">Hanya dapat diakses berdua dengan Kode Ruang dan 4-Digit PIN Rahasia.</p>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.8); padding: 6px 9px; border-radius: 6px; border: 1px solid #fed7aa;">
+                <span style="font-size: 14px;">📍</span>
+                <div>
+                  <strong style="font-size: 10.5px; color: #1c1917;">Geolokasi Presisi Antar Kota/Desa</strong>
+                  <p style="font-size: 10px; color: #57534e; margin: 0;">Kalkulasi kilometer riil antar kedua domisili pasangan secara otomatis.</p>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.8); padding: 6px 9px; border-radius: 6px; border: 1px solid #fed7aa;">
+                <span style="font-size: 14px;">🏷️</span>
+                <div>
+                  <strong style="font-size: 10.5px; color: #1c1917;">Kunci Fisik & Amplop Rindu</strong>
+                  <p style="font-size: 10px; color: #57534e; margin: 0;">Surat disegel di cloud dan hanya terbuka saat kedua HP bersatu atau scan barcode fisik.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Col 2: Section 1 Connection Flow -->
+          <div class="info-card">
+            <div class="section-badge-title">
+              <div class="num-badge">1</div>
+              <div class="section-name">Memulai & Menghubungkan Ruang</div>
+            </div>
+            <p style="font-size: 10.5px; color: #57534e; margin-bottom: 6px;">
+              Ikuti 2 langkah mudah untuk menyatukan ruang cinta kalian berdua:
+            </p>
+
+            <div class="step-box">
+              <div class="step-title">👤 Langkah A: Pembuat Ruang (Creator)</div>
+              <ol style="font-size: 10.5px; color: #44403c; padding-left: 14px; line-height: 1.4; margin: 0;">
+                <li>Buka website Titik Temu di browser smartphone atau laptop.</li>
+                <li>Masukkan <strong>Nama</strong> & <strong>Lokasi/Kota</strong> kamu (misal: <em>Lamongan</em>).</li>
+                <li>Buat <strong>4-Digit PIN Rahasia</strong> & klik <strong>"Buat Ruang Kita"</strong>.</li>
+                <li>Salin <strong>Kode Ruang</strong> (contoh: <code>TEMU-8821</code>) dan bagikan ke pasangan beserta PIN.</li>
+              </ol>
+            </div>
+
+            <div class="step-box">
+              <div class="step-title">💑 Langkah B: Pasangan (Partner)</div>
+              <ol style="font-size: 10.5px; color: #44403c; padding-left: 14px; line-height: 1.4; margin: 0;">
+                <li>Buka website Titik Temu di HP pasangan kamu.</li>
+                <li>Masukkan <strong>Nama</strong> & <strong>Lokasi/Kota</strong> kamu (misal: <em>Surabaya</em>).</li>
+                <li>Ketik <strong>Kode Ruang</strong> dan <strong>4-Digit PIN</strong> dari pasangan.</li>
+                <li>Klik <strong>"Sambungkan Dua Keping"</strong>. Ruang cinta kalian resmi aktif!</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <span>Titik Temu User Guide & Manual Book</span>
+        <span>Halaman 1 dari 3 (A4 Landscape)</span>
+      </div>
+    </div>
+
+    <!-- ==================== SHEET 2 / 3 ==================== -->
+    <div class="a4-sheet">
+      <div>
+        <div class="sheet-header">
+          <div class="brand-group">
+            <span class="brand-pill">✦ FITUR UTAMA ✦</span>
+            <span class="sheet-title-text">2. Menu Beranda (Home) & 3. Amplop Rindu Barcode</span>
+          </div>
+          <span class="page-index-badge">/// 02 — FITUR UTAMA</span>
+        </div>
+
+        <div class="grid-2-cols">
+          <!-- Col 1: Home Menu Features -->
+          <div class="info-card">
+            <div class="section-badge-title">
+              <div class="num-badge">2</div>
+              <div class="section-name">Fitur Utama di Menu Beranda (Home)</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">⏳ Days Together & Countdown Pertemuan</div>
+              <div class="feature-item-desc">
+                Menghitung jumlah hari jadian secara otomatis serta menampilkan hitung mundur waktu (hari, jam, menit) menuju jadwal pertemuan berikutnya.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">📍 Distance Between You Two & Ganti Lokasi</div>
+              <div class="feature-item-desc">
+                Menghitung jarak kilometer riil antar kedua domisili. Tekan tombol <strong>"Ganti Lokasiku"</strong> kapan saja jika salah satu pasangan berpindah kota.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">💬 Daily Connection Question</div>
+              <div class="feature-item-desc">
+                Satu pertanyaan romantis mendalam setiap hari. Jawaban pasangan baru akan terbuka setelah kalian berdua sama-sama mengisi jawaban hari ini!
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">🎵 Background Music & Suasana Romantis</div>
+              <div class="feature-item-desc">
+                Nikmati alunan musik latar intim yang menemani kalian saat mengeksplorasi ruang kenangan bersama.
+              </div>
+            </div>
+          </div>
+
+          <!-- Col 2: Amplop Rindu & Barcode -->
+          <div class="info-card">
+            <div class="section-badge-title">
+              <div class="num-badge">3</div>
+              <div class="section-name">Amplop Rindu & Kunci Fisik Barcode</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">💌 Menulis Surat & Foto Segel Rahasia Cloud</div>
+              <div class="feature-item-desc">
+                Tulis pesan rindu atau lampirkan foto kenangan. Klik <strong>"Segel Surat"</strong>. Pesan tersimpan rahasia di cloud dan <em>tidak bisa dibaca siapapun</em> sebelum kalian bertemu di dunia nyata.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">🔑 Buka Segel Saat Bertemu (Two Halves QR Scan)</div>
+              <div class="feature-item-desc">
+                Saat bertemu fisik, klik <strong>"Verify Meeting"</strong>. Pasangan A memilih <em>Belahan Kiri</em> dan Pasangan B memilih <em>Belahan Kanan</em>, satukan layar HP lalu scan untuk membuka surat serentak!
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">🏷️ Desain Kunci Fisik (Vintage Tag Gantungan Kunci)</div>
+              <div class="feature-item-desc">
+                Di tab <em>Tag Estetik</em>, unduh desain label eksklusif berisi watermark Titik Temu, tanggal jadian, dan barcode unik. Desain siap dicetak untuk gantungan kunci akrilik atau casing HP.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item-title">🖼️ Kolase Kenangan & Perpanjang Kunci (+30 Hari)</div>
+              <div class="feature-item-desc">
+                Setelah surat terbuka, klik <strong>"Unduh Kolase Kenangan"</strong>. Jika belum sempat bertemu, tekan <strong>"Perpanjang Masa Kunci"</strong> agar kunci fisik tetap aktif tanpa cetak ulang.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <span>Titik Temu User Guide & Manual Book</span>
+        <span>Halaman 2 dari 3 (A4 Landscape)</span>
+      </div>
+    </div>
+
+    <!-- ==================== SHEET 3 / 3 ==================== -->
+    <div class="a4-sheet">
+      <div>
+        <div class="sheet-header">
+          <div class="brand-group">
+            <span class="brand-pill">✦ PETUALANGAN & PROFIL ✦</span>
+            <span class="sheet-title-text">4. Journey Strava • 5. Keamanan • 6. Tentang Pengembang</span>
+          </div>
+          <span class="page-index-badge">/// 03 — CREATOR SPACE</span>
+        </div>
+
+        <!-- Top Section: Journey & Security -->
+        <div class="grid-2-cols" style="margin-bottom: 10px;">
+          <!-- Col 1: Journey & Strava -->
+          <div class="info-card" style="padding: 10px 12px;">
+            <div class="section-badge-title">
+              <div class="num-badge">4</div>
+              <div class="section-name" style="font-size: 12px;">Peta Petualangan & Strava LDR (Journey)</div>
+            </div>
+            <div style="font-size: 10.5px; color: #44403c; line-height: 1.35;">
+              • <strong>Poster Strava LDR:</strong> Menghitung total kilometer LDR, kecepatan kencan (<em>Pace</em>), serta menggambar rute oranye khas Strava. Klik <strong>"Pamerkan / Bagikan"</strong> untuk IG Story & WhatsApp.<br>
+              • <strong>Peta Interaktif & + Plan:</strong> Menampilkan pin rute jalan raya dan jadwalkan rencana kencan baru secara akurat.
+            </div>
+          </div>
+
+          <!-- Col 2: Security & Re-Login -->
+          <div class="info-card" style="padding: 10px 12px;">
+            <div class="section-badge-title">
+              <div class="num-badge">5</div>
+              <div class="section-name" style="font-size: 12px;">Keamanan, Privasi & Masuk Kembali</div>
+            </div>
+            <div style="font-size: 10.5px; color: #44403c; line-height: 1.35;">
+              • <strong>Ganti HP / Browser Baru?</strong> Data kalian aman di cloud database. Pada halaman depan, pilih menu <strong>"Masuk Kembali ke Ruang"</strong>, ketik Kode Ruang (<code>TEMU-XXXX</code>), Nama, dan 4-Digit PIN.<br>
+              • <strong>Privasi Penuh:</strong> Surat rindu dan koordinat terproteksi secara aman.
+            </div>
           </div>
         </div>
 
-        <!-- Portfolio QR Code -->
-        <div style="background: #ffffff; padding: 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-          <img src="data:image/png;base64,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" alt="Portfolio QR" style="width: 88px; height: 88px; display: block;" />
-          <span style="font-size: 8px; font-weight: 700; color: #1c1917; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; display: block;">
-            Scan Portfolio
-          </span>
+        <!-- Bottom Section: Developer Profile Showcase -->
+        <div style="background: linear-gradient(135deg, #18181b 0%, #27272a 100%); color: #ffffff; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid #3f3f46; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
+          
+          <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+            <img 
+              src="/docs/author-photo.jpg" 
+              alt="Abdurrosyid Robbani" 
+              style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #ea580c; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);"
+            />
+            <div>
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: rgba(234, 88, 12, 0.25); border: 1px solid rgba(234, 88, 12, 0.5); padding: 2px 8px; border-radius: 20px; font-size: 8.5px; font-weight: 800; letter-spacing: 0.15em; color: #fdba74; text-transform: uppercase; margin-bottom: 4px;">
+                ✦ Developer & Creator ✦
+              </div>
+              <h3 style="font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px; margin-bottom: 3px;">
+                Abdurrosyid Robbani
+              </h3>
+              <p style="font-size: 10.5px; color: #d6d3d1; line-height: 1.4; margin-bottom: 6px; max-width: 580px;">
+                Aplikasi <strong>Titik Temu</strong> dirancang dan dikembangkan dengan cinta sebagai karya portofolio digital yang memadukan teknologi web modern (Next.js, Tailwind CSS, Supabase, Leaflet), geolokasi presisi, dan pengalaman emosional bermakna untuk pasangan LDR.
+              </p>
+              <a href="https://abdurrosyid-portfolio.vercel.app/" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; color: #fdba74; text-decoration: none; border-bottom: 1px dashed #fdba74; padding-bottom: 1px;">
+                🌐 abdurrosyid-portfolio.vercel.app ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- QR Code -->
+          <div style="background: #ffffff; padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <img 
+              src="data:image/png;base64,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" 
+              alt="QR Portofolio" 
+              style="width: 72px; height: 72px; display: block;" 
+            />
+            <span style="font-size: 7.5px; font-weight: 800; color: #18181b; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; display: block;">
+              Scan Portfolio
+            </span>
+          </div>
         </div>
+      </div>
+
+      <div class="sheet-footer">
+        <span>"Jarak hanyalah jeda geografis, cinta kalian adalah garis yang tak pernah putus." — Abdurrosyid Robbani</span>
+        <span>Halaman 3 dari 3 (A4 Landscape)</span>
       </div>
     </div>
 
-    <div class="footer-quote">
-      "Jarak hanyalah jeda geografis, cinta kalian adalah garis yang tak pernah putus."<br>
-      <strong>Titik Temu App — Created by Abdurrosyid Robbani</strong>
-    </div>
   </div>
+
 </body>
 </html>
