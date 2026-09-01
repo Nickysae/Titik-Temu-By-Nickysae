@@ -13,11 +13,13 @@ function generateInviteCode(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, city } = await req.json();
+    const { name, city, pin } = await req.json();
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
+
+    const cleanPin = pin ? String(pin).trim() : null;
 
     // 1. Create User
     const user = await prisma.user.create({
@@ -36,10 +38,11 @@ export async function POST(req: NextRequest) {
       else inviteCode = generateInviteCode();
     }
 
-    // 3. Create Couple Space
+    // 3. Create Couple Space with PIN
     const couple = await prisma.couple.create({
       data: {
         inviteCode,
+        pin: cleanPin,
         status: "PENDING",
         userACity: city?.trim() || null,
         relationshipStart: new Date(),

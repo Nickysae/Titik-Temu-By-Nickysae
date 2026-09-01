@@ -4,7 +4,7 @@ import { setSession } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
-    const { inviteCode, name } = await req.json();
+    const { inviteCode, name, pin } = await req.json();
 
     if (!inviteCode?.trim() || !name?.trim()) {
       return NextResponse.json(
@@ -31,6 +31,17 @@ export async function POST(req: NextRequest) {
         { error: "Ruang dengan kode undangan tersebut tidak ditemukan" },
         { status: 404 }
       );
+    }
+
+    // Verify PIN if the couple has set a PIN
+    if (couple.pin) {
+      const cleanPin = pin ? String(pin).trim() : "";
+      if (!cleanPin || cleanPin !== couple.pin) {
+        return NextResponse.json(
+          { error: "PIN Ruang salah. Masukkan 4-digit PIN ruang kalian." },
+          { status: 403 }
+        );
+      }
     }
 
     // Match member by name (case-insensitive)

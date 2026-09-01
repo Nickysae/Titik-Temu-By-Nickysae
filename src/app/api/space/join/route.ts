@@ -4,7 +4,7 @@ import { setSession } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, city, inviteCode } = await req.json();
+    const { name, city, inviteCode, pin } = await req.json();
 
     if (!name?.trim() || !inviteCode?.trim()) {
       return NextResponse.json(
@@ -23,14 +23,25 @@ export async function POST(req: NextRequest) {
 
     if (!couple) {
       return NextResponse.json(
-        { error: "Invite code not found. Please check and try again." },
+        { error: "Kode ruang tidak ditemukan. Periksa kembali kodenya." },
         { status: 404 }
       );
     }
 
+    // Verify PIN if the creator set one
+    if (couple.pin) {
+      const cleanPin = pin ? String(pin).trim() : "";
+      if (!cleanPin || cleanPin !== couple.pin) {
+        return NextResponse.json(
+          { error: "PIN Ruang salah. Tanyakan 4-digit PIN ke pasanganmu." },
+          { status: 403 }
+        );
+      }
+    }
+
     if (couple.members.length >= 2) {
       return NextResponse.json(
-        { error: "This couple space is already full." },
+        { error: "Ruang pasangan ini sudah terisi 2 orang." },
         { status: 400 }
       );
     }

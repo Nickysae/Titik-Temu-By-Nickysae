@@ -22,6 +22,7 @@ model User {
 model Couple {
   id                String    @id @default(cuid())
   inviteCode        String    @unique
+  pin               String?   // 4-digit secret space PIN (e.g. 1234)
   status            String    @default("PENDING") // PENDING, ACTIVE
   relationshipStart DateTime?
   userACity         String?
