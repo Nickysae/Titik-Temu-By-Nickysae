@@ -27,6 +27,17 @@ export default async function JourneyPage() {
   const displayKmValue = hasCompleted ? completedKm : plannedKm;
   const kmLabel = hasCompleted ? "KM Crossed" : "Planned KM";
 
+  const cityA = couple.userACity || (couple.members[0]?.user?.city ?? "");
+  const cityB = couple.userBCity || (couple.members[1]?.user?.city ?? "");
+
+  let headerApartKm = nextMeeting?.distance ?? 0;
+  if (!nextMeeting && cityA && cityB) {
+    const { getCityCoordinates, getDistanceKm } = await import("@/lib/geo");
+    const coordsA = getCityCoordinates(cityA, 0);
+    const coordsB = getCityCoordinates(cityB, 1);
+    headerApartKm = getDistanceKm(coordsA, coordsB);
+  }
+
   return (
     <div className="flex flex-col min-h-full">
       <SpaceHeader
@@ -43,7 +54,7 @@ export default async function JourneyPage() {
 
         <div className="mt-8 flex flex-col items-center">
           <span className="text-3xl font-light text-[var(--color-foreground)] tracking-wide">
-            {nextMeeting?.distance ?? 0} KM
+            {headerApartKm.toLocaleString("id-ID")} KM
           </span>
           <span className="text-[9px] tracking-[0.3em] text-[var(--color-muted)] mt-2 uppercase">
             Apart

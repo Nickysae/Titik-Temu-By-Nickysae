@@ -41,6 +41,18 @@ export default async function Home() {
   const partnerUser = partnerMember ? partnerMember.user : null;
   const isWaitingPartner = couple.members.length < 2;
 
+  const cityA = couple.userACity || me?.city || "";
+  const cityB = couple.userBCity || partnerUser?.city || "";
+
+  // If there's a planned meeting, use its distance. Otherwise, calculate distance between their 2 home cities!
+  let displayDistance = nextMeeting?.distance ?? 0;
+  if (!nextMeeting && cityA && cityB) {
+    const { getCityCoordinates, getDistanceKm } = await import("@/lib/geo");
+    const coordsA = getCityCoordinates(cityA, 0);
+    const coordsB = getCityCoordinates(cityB, 1);
+    displayDistance = getDistanceKm(coordsA, coordsB);
+  }
+
   return (
     <div className="flex flex-col min-h-full">
       {/* Top Space Bar */}
@@ -88,9 +100,9 @@ export default async function Home() {
         )}
 
         <DistancePreview
-          distance={nextMeeting?.distance ?? 0}
-          userACity={couple.userACity || me?.city || "Kota Kamu"}
-          userBCity={couple.userBCity || partnerUser?.city || "Kota Pasangan"}
+          distance={displayDistance}
+          userACity={cityA || "Kota Kamu"}
+          userBCity={cityB || "Kota Pasangan"}
           myCity={me?.city || ""}
           myName={me?.name || "Kamu"}
           partnerName={partnerUser?.name || "Pasangan"}
