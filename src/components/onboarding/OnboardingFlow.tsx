@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HeartHandshake, Sparkles, Copy, Check, ArrowRight, Share2 } from "lucide-react";
+import { HeartHandshake, Sparkles, Copy, Check, ArrowRight, Share2, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function OnboardingFlow() {
@@ -176,6 +177,14 @@ export default function OnboardingFlow() {
               >
                 {isSubmitting ? "Membuka Demo..." : "⚡ Buka Demo Space: Layla & Majnun"}
               </button>
+
+              <Link
+                href="/manual-book"
+                className="mt-1 w-full py-3 rounded-full bg-transparent border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] text-[10px] font-medium tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2"
+              >
+                <BookOpen size={13} />
+                <span>📖 Baca Panduan Pengguna</span>
+              </Link>
             </div>
           </motion.div>
         )}
