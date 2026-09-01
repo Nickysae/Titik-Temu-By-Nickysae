@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No active couple space" }, { status: 401 });
     }
 
-    const { content } = await req.json();
-    if (!content?.trim()) {
-      return NextResponse.json({ error: "Content is required" }, { status: 400 });
+    const { content, photoUrl } = await req.json();
+    if (!content?.trim() && !photoUrl) {
+      return NextResponse.json({ error: "Content or photo is required" }, { status: 400 });
     }
 
     // Find active LOCKED jar for this couple
@@ -59,7 +59,8 @@ export async function POST(req: NextRequest) {
       data: {
         jarId: jar.id,
         authorId: session.userId,
-        content: content.trim(),
+        content: content?.trim() || "(Foto Kenangan)",
+        photoUrl: photoUrl || null,
       },
       include: { author: true },
     });

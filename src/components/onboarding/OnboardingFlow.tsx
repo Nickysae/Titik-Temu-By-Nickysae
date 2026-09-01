@@ -5,7 +5,7 @@ import { HeartHandshake, Sparkles, Copy, Check, ArrowRight, Share2 } from "lucid
 import { useRouter } from "next/navigation";
 
 export default function OnboardingFlow() {
-  const [view, setView] = useState<"landing" | "create" | "waiting" | "join">("landing");
+  const [view, setView] = useState<"landing" | "create" | "waiting" | "join" | "login">("landing");
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [inviteCodeInput, setInviteCodeInput] = useState("");
@@ -56,6 +56,30 @@ export default function OnboardingFlow() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal bergabung");
+
+      router.refresh();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLoginSpace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !inviteCodeInput.trim()) return;
+    setIsSubmitting(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/space/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, inviteCode: inviteCodeInput }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal masuk kembali");
 
       router.refresh();
     } catch (err: any) {
@@ -126,7 +150,7 @@ export default function OnboardingFlow() {
                 onClick={() => setView("create")}
                 className="w-full py-3.5 rounded-full bg-[var(--color-foreground)] text-white hover:bg-[var(--color-brand)] text-[11px] font-medium tracking-[0.15em] uppercase transition-all shadow-md flex items-center justify-center gap-2"
               >
-                <span>Buat Ruang Kita</span>
+                <span>Buat Ruang Baru</span>
                 <ArrowRight size={14} />
               </button>
 
@@ -134,13 +158,20 @@ export default function OnboardingFlow() {
                 onClick={() => setView("join")}
                 className="w-full py-3.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-foreground)] hover:border-[var(--color-brand)] text-[11px] font-medium tracking-[0.15em] uppercase transition-all"
               >
-                <span>Gabung Ruang Pasangan</span>
+                <span>Gabung Ruang Pasangan (Kode Baru)</span>
+              </button>
+
+              <button
+                onClick={() => setView("login")}
+                className="w-full py-3.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-brand)]/40 text-[var(--color-brand)] hover:bg-[var(--color-brand)]/10 text-[11px] font-medium tracking-[0.15em] uppercase transition-all"
+              >
+                <span>🔑 Masuk Kembali ke Ruang Kami</span>
               </button>
 
               <button
                 onClick={handleQuickDemo}
                 disabled={isSubmitting}
-                className="mt-4 text-[10px] text-[var(--color-muted)] hover:text-[var(--color-brand)] uppercase tracking-wider transition-colors disabled:opacity-50"
+                className="mt-3 text-[10px] text-[var(--color-muted)] hover:text-[var(--color-brand)] uppercase tracking-wider transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? "Membuka Demo..." : "⚡ Buka Demo Space: Layla & Majnun"}
               </button>
@@ -351,6 +382,80 @@ export default function OnboardingFlow() {
                 className="w-full mt-4 py-3.5 rounded-full bg-[var(--color-foreground)] text-white hover:bg-[var(--color-brand)] text-[10px] font-medium tracking-[0.2em] uppercase transition-all shadow-md disabled:opacity-50"
               >
                 {isSubmitting ? "Menghubungkan..." : "Sambungkan Dua Keping"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setView("landing")}
+                className="text-[10px] text-center text-[var(--color-muted)] hover:text-[var(--color-foreground)] uppercase tracking-wider mt-2"
+              >
+                Kembali
+              </button>
+            </form>
+          </motion.div>
+        )}
+
+        {/* 5. Re-Login Form */}
+        {view === "login" && (
+          <motion.div
+            key="login"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full max-w-sm flex flex-col items-center py-6"
+          >
+            <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)] mb-4">
+              <span className="text-xl">🔑</span>
+            </div>
+
+            <h2 className="text-xl font-light text-[var(--color-foreground)]">
+              Masuk Kembali ke Ruang
+            </h2>
+            <p className="text-[11px] text-[var(--color-muted)] mt-1 mb-6">
+              Masukkan kode undangan kamar kalian dan namamu
+            </p>
+
+            <form onSubmit={handleLoginSpace} className="w-full flex flex-col gap-4 text-left">
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[11px] text-center leading-relaxed">
+                  {errorMsg}
+                </div>
+              )}
+
+              <div>
+                <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block mb-1.5 font-medium">
+                  Kode Undangan Ruang
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: TEMU-XXXX"
+                  value={inviteCodeInput}
+                  onChange={(e) => setInviteCodeInput(e.target.value.toUpperCase())}
+                  className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs font-mono tracking-widest text-[var(--color-brand)] outline-none focus:border-[var(--color-brand)] transition-colors text-center"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block mb-1.5 font-medium">
+                  Nama Kamu (yang terdaftar di ruang)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Rosyid"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full mt-4 py-3.5 rounded-full bg-[var(--color-foreground)] text-white hover:bg-[var(--color-brand)] text-[10px] font-medium tracking-[0.2em] uppercase transition-all shadow-md disabled:opacity-50"
+              >
+                {isSubmitting ? "Membuka Pintu..." : "Buka Ruang Kita"}
               </button>
 
               <button

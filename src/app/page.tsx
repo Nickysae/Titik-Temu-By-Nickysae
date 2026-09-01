@@ -47,6 +47,7 @@ export default async function Home() {
       <SpaceHeader
         inviteCode={couple.inviteCode}
         isWaiting={isWaitingPartner}
+        currentUser={me}
       />
 
       {/* Couple Names & Days Together Header */}

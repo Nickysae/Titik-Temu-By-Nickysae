@@ -12,6 +12,7 @@ model User {
   id        String   @id @default(cuid())
   name      String
   city      String?
+  avatarUrl String?  // Optional base64 or URL avatar
   createdAt DateTime @default(now())
 
   coupleMembers CoupleMember[]
@@ -76,6 +77,7 @@ model Rindu {
   jarId     String
   authorId  String
   content   String
+  photoUrl  String?  // Optional base64 or external URL photo attachment
   createdAt DateTime @default(now())
 
   jar    RinduJar @relation(fields: [jarId], references: [id], onDelete: Cascade)

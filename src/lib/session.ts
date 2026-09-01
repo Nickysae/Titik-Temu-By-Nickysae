@@ -8,7 +8,7 @@ const COUPLE_COOKIE = "titik_couple_id";
 export interface SessionData {
   userId: string | null;
   coupleId: string | null;
-  user: { id: string; name: string; city: string | null } | null;
+  user: { id: string; name: string; city: string | null; avatarUrl?: string | null } | null;
   couple: any | null;
 }
 

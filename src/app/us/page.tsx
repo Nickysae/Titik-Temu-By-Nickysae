@@ -44,7 +44,11 @@ export default async function UsPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <SpaceHeader inviteCode={couple.inviteCode} isWaiting={couple.members.length < 2} />
+      <SpaceHeader
+        inviteCode={couple.inviteCode}
+        isWaiting={couple.members.length < 2}
+        currentUser={me}
+      />
 
       {/* Header */}
       <header className="pt-8 pb-8 flex flex-col items-center justify-center">

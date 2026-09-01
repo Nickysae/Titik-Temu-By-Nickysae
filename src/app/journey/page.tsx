@@ -29,7 +29,11 @@ export default async function JourneyPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <SpaceHeader inviteCode={couple.inviteCode} isWaiting={couple.members.length < 2} />
+      <SpaceHeader
+        inviteCode={couple.inviteCode}
+        isWaiting={couple.members.length < 2}
+        currentUser={session.user}
+      />
 
       {/* Header */}
       <header className="pt-8 pb-6 flex flex-col items-center justify-center border-b border-[var(--color-border)]/50">

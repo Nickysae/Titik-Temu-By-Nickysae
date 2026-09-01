@@ -53,7 +53,11 @@ export default async function RinduPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <SpaceHeader inviteCode={couple.inviteCode} isWaiting={couple.members.length < 2} />
+      <SpaceHeader
+        inviteCode={couple.inviteCode}
+        isWaiting={couple.members.length < 2}
+        currentUser={session.user}
+      />
 
       <header className="pt-8 pb-4 flex flex-col items-center justify-center">
         <h1 className="text-[10px] tracking-[0.4em] font-medium text-[var(--color-muted)] uppercase">

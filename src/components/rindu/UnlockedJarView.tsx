@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { RefreshCw, Heart, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RefreshCw, Heart, Calendar, Sparkles, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import RinduCollage from "./RinduCollage";
 
 export interface RinduItem {
   id: string;
   content: string;
+  photoUrl?: string | null;
   createdAt: Date | string;
   author: {
     name: string;
@@ -20,6 +22,8 @@ interface Props {
 
 export default function UnlockedJarView({ rindus, total }: Props) {
   const [isResetting, setIsResetting] = useState(false);
+  const [isCollageOpen, setIsCollageOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const router = useRouter();
 
   const handleStartNewJar = async () => {
@@ -43,7 +47,7 @@ export default function UnlockedJarView({ rindus, total }: Props) {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 text-center shadow-sm mb-8 flex flex-col items-center"
+        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 text-center shadow-sm mb-6 flex flex-col items-center"
       >
         {/* Open Envelope Vector Art */}
         <div className="mb-4">
@@ -77,6 +81,17 @@ export default function UnlockedJarView({ rindus, total }: Props) {
         <p className="text-[11px] text-[var(--color-muted)] mt-1 tracking-wider uppercase">
           {total} surat rindu kini telah sampai dan terbaca
         </p>
+
+        {/* Collage generator CTA button */}
+        {rindus.length > 0 && (
+          <button
+            onClick={() => setIsCollageOpen(true)}
+            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#e2b77a]/20 to-[#d9534f]/20 border border-[var(--color-brand)]/40 text-[var(--color-foreground)] hover:border-[var(--color-brand)] text-[10px] font-medium tracking-[0.2em] uppercase transition-all shadow-sm group hover:scale-[1.02]"
+          >
+            <Sparkles size={13} className="text-[var(--color-brand)] group-hover:rotate-12 transition-transform" />
+            <span>Buat & Unduh Kolase Kenangan</span>
+          </button>
+        )}
       </motion.div>
 
       {/* Rindu Messages Cards (Styled like Parchment Letters) */}
@@ -87,9 +102,9 @@ export default function UnlockedJarView({ rindus, total }: Props) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.08, duration: 0.4 }}
-            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col gap-3"
           >
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-center">
               <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-[var(--color-brand)] flex items-center gap-1">
                 <Heart size={10} className="fill-[var(--color-brand)]" />
                 {rindu.author.name}
@@ -103,6 +118,25 @@ export default function UnlockedJarView({ rindus, total }: Props) {
                 })}
               </span>
             </div>
+
+            {/* Photo Attachment if available */}
+            {rindu.photoUrl && (
+              <div 
+                className="w-full h-48 rounded-xl overflow-hidden border border-[var(--color-border)] cursor-pointer group relative bg-black/20"
+                onClick={() => setSelectedPhoto(rindu.photoUrl!)}
+              >
+                <img
+                  src={rindu.photoUrl}
+                  alt="Foto Rindu"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-[10px] uppercase tracking-wider text-white bg-black/60 px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1">
+                    <ImageIcon size={10} /> Lihat Foto
+                  </span>
+                </div>
+              </div>
+            )}
 
             <p className="text-[13px] leading-relaxed text-[var(--color-foreground)] font-light italic">
               "{rindu.content}"
@@ -125,6 +159,37 @@ export default function UnlockedJarView({ rindus, total }: Props) {
           Surat-surat lama akan tersimpan abadi di riwayat cerita kalian.
         </p>
       </div>
+
+      {/* Collage Modal */}
+      {isCollageOpen && (
+        <RinduCollage
+          rindus={rindus}
+          onClose={() => setIsCollageOpen(false)}
+        />
+      )}
+
+      {/* Single Photo Zoom Modal */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedPhoto(null)}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+          >
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={selectedPhoto}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl border border-white/10"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
