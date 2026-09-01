@@ -10,28 +10,50 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least 2 locations required" }, { status: 400 });
     }
 
-    // Build ORS coordinate pairs [lng, lat]
-    const coordinates = locations.map((loc: string, i: number) => {
-      const [lat, lng] = getCityCoordinates(loc, i);
-      return [lng, lat];
-    });
+    // Fetch dynamic OSM coordinates for specific desa/kecamatan/kota
+    const coordinates: [number, number][] = [];
+    for (let i = 0; i < locations.length; i++) {
+      const loc = locations[i].trim();
+      try {
+        const encoded = encodeURIComponent(loc);
+        const osmRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1&countrycodes=id`,
+          {
+            headers: {
+              "User-Agent": "TitikTemuApp/1.0 (contact: support@titiktemu.app)",
+            },
+          }
+        );
+        if (osmRes.ok) {
+          const data = await osmRes.json();
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            coordinates.push([lon, lat]); // [lng, lat] for ORS
+            continue;
+          }
+        }
+      } catch (e) {
+        // Fallback below
+      }
+
+      // Static fallback if Nominatim empty
+      const [fallbackLat, fallbackLng] = getCityCoordinates(loc, i);
+      coordinates.push([fallbackLng, fallbackLat]);
+    }
 
     // If only 2 locations and distance calculation requested
     const apiKey = process.env.ORS_API_KEY;
     if (!apiKey) {
       // Fallback: calculate Haversine distance if no ORS API key
-      const [lat1, lng1] = getCityCoordinates(locations[0], 0);
-      const [lat2, lng2] = getCityCoordinates(locations[1], 1);
+      const [lng1, lat1] = coordinates[0];
+      const [lng2, lat2] = coordinates[1];
       const { getDistanceKm } = await import("@/lib/geo");
       const straightKm = getDistanceKm([lat1, lng1], [lat2, lng2]);
 
-      const coords = locations.map((loc: string, i: number) => {
-        const [lat, lng] = getCityCoordinates(loc, i);
-        return [lng, lat];
-      });
       return NextResponse.json({
         type: "straight",
-        coordinates: coords.map(([lng, lat]: [number, number]) => [lat, lng]),
+        coordinates: coordinates.map(([lng, lat]: [number, number]) => [lat, lng]),
         distanceKm: straightKm,
       });
     }

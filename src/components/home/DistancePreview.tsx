@@ -117,24 +117,27 @@ export default function DistancePreview({
                   Pindah / Ganti Kota
                 </h3>
               </div>
-              <p className="text-[10px] text-[var(--color-muted)] mb-5 leading-relaxed">
-                Jarak LDR dan rute temu kalian akan otomatis disesuaikan dengan posisi terbarumu.
+              <p className="text-[10px] text-[var(--color-muted)] mb-4 leading-relaxed">
+                Jarak LDR dan rute temu kalian akan otomatis disesuaikan secara presisi hingga tingkat desa & kecamatan.
               </p>
 
               <form onSubmit={handleUpdateCity} className="flex flex-col gap-3">
                 <div>
                   <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block mb-1 font-medium">
-                    Kota Asal {myName} Sekarang
+                    Lokasi / Domisili {myName} Sekarang
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Jakarta, Bandung, Malang..."
+                    placeholder="Contoh: Desa Paciran, Kec. Paciran, Lamongan"
                     value={newCity}
                     onChange={(e) => setNewCity(e.target.value)}
                     className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
                     required
                     autoFocus
                   />
+                  <p className="text-[9px] text-[var(--color-muted)] mt-1.5 leading-normal">
+                    💡 <span className="font-medium">Tips:</span> Kamu bisa memasukkan format lengkap <span className="font-mono text-[var(--color-brand)]">Desa, Kecamatan, Kota/Kab</span> agar titik peta tidak tertukar.
+                  </p>
                 </div>
 
                 <button

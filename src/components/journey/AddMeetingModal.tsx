@@ -139,11 +139,11 @@ export default function AddMeetingModal({ isOpen, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[9px] uppercase tracking-widest text-[var(--color-muted)] block mb-1.5 font-medium">
-                Location City
+                Location / Tempat Temu
               </label>
               <input
                 type="text"
-                placeholder="e.g. Yogyakarta, Bandung, Malang..."
+                placeholder="Contoh: Pantai Kuta, Badung, Bali"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--color-foreground)] outline-none focus:border-[var(--color-brand)] transition-colors"
